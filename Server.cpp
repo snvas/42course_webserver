@@ -115,3 +115,9 @@ std::string NumtoStr(int Num){
 	ss << Num;
 	return ss.str();
 }
+
+void Server::stop(void){
+	std::cout << "Stopping Webserver" << std::endl;
+	this->m_pollfds.clear();
+	std::cout << "Good Bye!!" << std::endl;
+}

@@ -13,6 +13,7 @@ class Server{
 
 		bool init();
 		void run();
+		void stop();
 	
 	private:
 
