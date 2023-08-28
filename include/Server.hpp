@@ -1,18 +1,23 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "Webserver.hpp"
 #include "CommonLibs.hpp"
+#include "Parser.hpp"
+#include "Server.hpp"
+#include "RequestParser.hpp"
+#include "ResponseHandler.hpp"
 
 class Server{
 	public:
 		Server();
 		Server(const ServerConfig &config);
 		~Server();
-		Server &operator=(const ServerConfig &src);
+		Server& operator=(const Server& other);
 
-		bool init();
+		bool initializeServer();
 		void run();
+		void processClientRequest(size_t i);
+		void acceptNewConnection();
 		void stop();
 	
 	private:
@@ -21,9 +26,11 @@ class Server{
 		int m_listenSocket;
 		std::vector<pollfd> m_pollfds;
 
-		bool setNonBlocking(int socket);
-		bool bindAndListen();
+		bool setSocketToNonBlocking(int socket);
+		void handleIncomingRequest();
+		bool bindSocketAndListen();
+		std::string numberToString(int number);
+
 };
 
-std::string NumtoStr(int Num);
 #endif
