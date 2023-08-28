@@ -51,15 +51,15 @@ struct ServerConfig : public ConfigBlock
 	ServerConfig();
 	~ServerConfig();
 };
-void printConfigs(const std::vector<ServerConfig> &servers);
-std::vector<ServerConfig> parseConfig(const std::string &config);
+void printServerConfigurations(const std::vector<ServerConfig> &servers);
+std::vector<ServerConfig> parseConfiguration(const std::string &config);
 void processLocationDirective(const std::string &line,
 			      LocationConfig &currentLocation);
 void processServerDirective(const std::string &line,
 			    ServerConfig &currentServer);
 std::vector<std::string> extractMultipleWords(std::stringstream &ss);
 std::string trim(const std::string &str);
-std::string checkArguments(int argc, char **argv);
+std::string checkCommandLineArguments(int argc, char **argv);
 std::string readConfigFile(const std::string &path);
 
 #endif

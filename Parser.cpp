@@ -1,6 +1,11 @@
 #include "Parser.hpp"
 
-std::string checkArguments(int argc, char **argv)
+std::string trim(const std::string &str);
+std::vector<std::string> extractMultipleWords(std::stringstream &ss);
+void processServerDirective(const std::string &line, ServerConfig &currentServer);
+void processLocationDirective(const std::string &line, LocationConfig &currentLocation);
+
+std::string checkCommandLineArguments(int argc, char **argv)
 {
 	if (argc != 2)
 	{
@@ -27,56 +32,42 @@ std::string readConfigFile(const std::string &path)
 }
 
 ServerConfig::ServerConfig()
+    : listen_port(0), server_name(""), client_max_body_size(-1),
+      directory_listing(""), root("")
 {
-	listen_port = 0;
-	server_name = "";
-	client_max_body_size = -1;
-	index = std::vector<std::string>();
-	allowed_method = std::vector<std::string>();
-	default_error_page = std::vector<std::string>();
-	directory_listing = "";
-	locations = std::map<std::string, LocationConfig>();
-	root = "";
 }
 
 ServerConfig::~ServerConfig() {}
-
-
 
 // Função que retira espaços em branco no início e no final da string dada
 std::string trim(const std::string &str)
 {
 	// Definindo os caracteres de espaço em branco
-	std::string whitespace = " \t";
-
+	const std::string whitespace = " \t";
 	// Encontra a primeira posição que não é um espaço em branco
-	std::string::size_type strBegin = str.find_first_not_of(whitespace);
-
+	const std::string::size_type strBegin = str.find_first_not_of(whitespace);
 	// Se toda a string é um espaço em branco, retorna uma string vazia
-	if (strBegin == std::string::npos)
-		return "";
-
+	if (strBegin == std::string::npos) return "";
 	// Encontra a última posição que não é um espaço em branco
-	std::string::size_type strEnd = str.find_last_not_of(whitespace);
-
+	const std::string::size_type strEnd = str.find_last_not_of(whitespace);
 	// Calcula o tamanho da substring sem espaços em branco
-	std::string::size_type strRange = strEnd - strBegin + 1;
-
+	const std::string::size_type strRange = strEnd - strBegin + 1;
 	// Retorna a substring sem espaços em branco
 	return str.substr(strBegin, strRange);
 }
 
+// Helper function to extract multiple words from a stringstream
 std::vector<std::string> extractMultipleWords(std::stringstream &ss)
 {
 	std::vector<std::string> words;
 	std::string word;
-	while (ss >> word)
-	{
+	while (ss >> word) {
 		words.push_back(word);
 	}
 	return words;
 }
 
+// Function to process server directives
 void processServerDirective(const std::string &line,
 			    ServerConfig &currentServer)
 {
@@ -133,6 +124,7 @@ void processServerDirective(const std::string &line,
 	}
 }
 
+// Function to process location directives
 void processLocationDirective(const std::string &line,
 			      LocationConfig &currentLocation)
 {
@@ -188,7 +180,8 @@ void processLocationDirective(const std::string &line,
 	}
 }
 
-std::vector<ServerConfig> parseConfig(const std::string &config)
+// Parsing function
+std::vector<ServerConfig> parseConfiguration(const std::string &config)
 {
 	std::stringstream ss(config);
 	std::string line;
@@ -275,7 +268,7 @@ std::vector<ServerConfig> parseConfig(const std::string &config)
 	return servers;
 }
 
-void printConfigs(const std::vector<ServerConfig> &servers)
+void printServerConfigurations(const std::vector<ServerConfig> &servers)
 {
 	for (std::vector<ServerConfig>::const_iterator serverIt =
 		 servers.begin();

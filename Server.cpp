@@ -1,6 +1,10 @@
 #include "Server.hpp"
 
-Server::Server(){}
+Server::Server() {}
+
+Server::Server(const ServerConfig &config) : m_config(config){
+	initializeServer();
+}
 
 Server::~Server(){
 	close(m_listenSocket);
@@ -9,17 +13,41 @@ Server::~Server(){
 	}
 }
 
-Server &Server::operator=(const ServerConfig &src){
-	(void) src;
-	return (*this);
+Server &Server::operator=(const Server &other)
+{
+	if (this != &other) // Verifica auto-atribuição
+	{
+		// Limpa os recursos do objeto atual
+		close(m_listenSocket);
+		for (std::vector<struct pollfd>::iterator it =
+			 m_pollfds.begin();
+		     it != m_pollfds.end(); ++it)
+		{
+			close(it->fd);
+		}
+		m_pollfds.clear();
+
+		// Copia os recursos do objeto 'other'
+		m_config = other.m_config;
+		m_listenSocket = other.m_listenSocket;
+
+		// Para o vetor m_pollfds, é melhor fazer uma cópia profunda,
+		// para evitar problemas de propriedade compartilhada.
+		for (std::vector<struct pollfd>::const_iterator it =
+			 other.m_pollfds.begin();
+		     it != other.m_pollfds.end(); ++it)
+		{
+			struct pollfd pfd;
+			pfd.fd = it->fd;
+			pfd.events = it->events;
+			pfd.revents = it->revents;
+			m_pollfds.push_back(pfd);
+		}
+	}
+	return *this;
 }
 
-Server::Server(const ServerConfig &config){
-	this->m_config = config;
-	init();
-}
-
-bool Server::init(){
+bool Server::initializeServer(){
 	std::cout << "Webserv running " << std::endl;
 
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -29,22 +57,22 @@ bool Server::init(){
 		return false;
 	}
 
-	if (!setNonBlocking(m_listenSocket)){
+	if (!setSocketToNonBlocking(m_listenSocket)){
 		return false;
 	}
 
-	if (!bindAndListen()){
+	if (!bindSocketAndListen()){
 		return false;
 	}
 
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
-	std::cout << "Server started on port: " + m_config.server_name + ":" + NumtoStr(m_config.listen_port) << std::endl;
+	std::cout << "Server started on port: " + m_config.server_name + ":" + numberToString(m_config.listen_port) << std::endl;
 
 	return true;
 }
 
-bool Server::setNonBlocking(int socket){
+bool Server::setSocketToNonBlocking(int socket){
 	int flags = fcntl(socket, F_GETFL, 0);
 	if (flags == -1){
 		std::cerr << "Cannot get socket flags." << std::endl;
@@ -59,7 +87,7 @@ bool Server::setNonBlocking(int socket){
 	return true;
 }
 
-bool Server::bindAndListen(){
+bool Server::bindSocketAndListen(){
 	sockaddr_in serverAddr;
 	std::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
@@ -84,35 +112,59 @@ void Server::run(){
 			std::cerr << "Error on poll." << std::endl;
 			break;
 		}
+		handleIncomingRequest();
+	}
+}
 
-		for (size_t i = 0; i < m_pollfds.size(); ++i){
-			if (m_pollfds[i].revents & POLLIN){
-				if (m_pollfds[i].fd == m_listenSocket){
-					int clientSocket = accept(m_listenSocket, NULL, NULL);
-					if (clientSocket > 0){
-						setNonBlocking(clientSocket);
-						struct pollfd pfd = { clientSocket, POLLIN, 0};
-						m_pollfds.push_back(pfd);
-					}
-				} else {
-					char buffer[1024];
-					ssize_t bytesRead = recv(m_pollfds[i].fd, buffer, sizeof(buffer), 0);
-					if (bytesRead <= 0){
-						close(m_pollfds[i].fd);
-						m_pollfds.erase(m_pollfds.begin() + i);
-						--i;
-					} else{
-						send(m_pollfds[i].fd, buffer, bytesRead, 0);
-					}
-				}
+void Server::handleIncomingRequest()
+{
+
+	for (size_t i = 0; i < m_pollfds.size(); ++i)
+	{
+		if (m_pollfds[i].revents & POLLIN)
+		{
+			if (m_pollfds[i].fd == m_listenSocket)
+			{
+				acceptNewConnection();
+			}
+			else
+			{
+				processClientRequest(i);
 			}
 		}
 	}
 }
 
-std::string NumtoStr(int Num){
+void Server::acceptNewConnection()
+{
+	int clientSocket = accept(m_listenSocket, NULL, NULL);
+	if (clientSocket > 0)
+	{
+		setSocketToNonBlocking(clientSocket);
+		struct pollfd pfd = {clientSocket, POLLIN, 0};
+		m_pollfds.push_back(pfd);
+	}
+}
+
+void Server::processClientRequest(size_t i)
+{
+	char buffer[1024];
+	ssize_t bytesRead = recv(m_pollfds[i].fd, buffer, sizeof(buffer), 0);
+	if (bytesRead <= 0)
+	{
+		close(m_pollfds[i].fd);
+		m_pollfds.erase(m_pollfds.begin() + i);
+		--i;
+	}
+	else
+	{
+		send(m_pollfds[i].fd, buffer, bytesRead, 0);
+	}
+}
+
+std::string Server::numberToString(int number){
 	std::ostringstream ss;
-	ss << Num;
+	ss <<number;
 	return ss.str();
 }
 
