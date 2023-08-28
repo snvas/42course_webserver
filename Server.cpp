@@ -158,6 +158,42 @@ void Server::processClientRequest(size_t i)
 	}
 	else
 	{
+		std::string requestString(buffer);
+		requestString = requestString.substr(0, bytesRead);
+		RequestParser parser;
+		Request request = parser.parsingRequest(requestString);
+
+		std::cout << "Method: " << request.method << std::endl;
+		std::cout << "URI: " << request.uri << std::endl;
+		if (!request.query.empty()){
+			std::cout << "Query: " << request.query << std::endl;
+		}
+		std::cout << "HTTP Version: " << request.httpVersion << std::endl;
+		std::cout << "Host: " << request.host << std::endl;
+		if (!request.port.empty()){
+			std::cout << "Port: " << request.port << std::endl;
+		}
+		if (!request.content_lenght.empty()){
+			std::cout << "Content-Lenght: " << request.content_lenght << std::endl;
+		}
+		if (!request.content_type.empty()){
+			std::cout << "Content-Type: " << request.content_type << std::endl;
+		}
+		if (!request.user_agent.empty()){
+			std::cout << "User-Agent: " << request.user_agent << std::endl;
+		}
+		if (!request.authorization.empty()){
+			std::cout << "Authorization: " << request.authorization << std::endl;
+		}
+		if (!request.accept.empty()){
+			std::cout << "Accept: " << request.accept << std::endl;
+		}
+		if (!request.cgi_path.empty()){
+			std::cout << "CGI Path: " << request.cgi_path << std::endl;
+		}
+		if (!request.body.empty()){
+			std::cout << "Body:\n " << request.body << std::endl;
+		}
 		send(m_pollfds[i].fd, buffer, bytesRead, 0);
 	}
 }

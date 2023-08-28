@@ -1,6 +1,4 @@
 #include "Webserver.hpp"
-#include "Server.hpp"
-#include "Parser.hpp"
 #include <csignal>
 
 Server webServer;
