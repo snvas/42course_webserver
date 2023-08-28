@@ -1,4 +1,4 @@
-#include "Webserver.hpp"
+#include "Server.hpp"
 #include <csignal>
 
 Server webServer;

@@ -1,8 +1,11 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include "Webserver.hpp"
 #include "CommonLibs.hpp"
+#include "Parser.hpp"
+#include "Server.hpp"
+#include "RequestParser.hpp"
+#include "ResponseHandler.hpp"
 
 class Server{
 	public:

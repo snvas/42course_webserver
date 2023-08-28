@@ -195,6 +195,9 @@ void Server::processClientRequest(size_t i)
 			std::cout << "Body:\n " << request.body << std::endl;
 		}
 		send(m_pollfds[i].fd, buffer, bytesRead, 0);
+
+		ResponseHandler responseHandler;
+		Response response = responseHandler.generateResponse(request);
 	}
 }
 

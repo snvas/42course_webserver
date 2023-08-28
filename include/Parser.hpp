@@ -3,7 +3,6 @@
 
 #include "CommonLibs.hpp"
 
-
 // Estados para a máquina de estados.
 enum State
 {

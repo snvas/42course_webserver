@@ -1,11 +1,11 @@
-#ifndef REQUEST_HPP
-#define REQUEST_HPP
+#ifndef REQUESTPARSER_HPP
+#define REQUESTPARSER_HPP
 
 #include "CommonLibs.hpp"
-#include "Webserver.hpp"
 
-struct Request
+class Request
 {
+	public:
 	std::string method;
 	std::string host;
 	std::string port;
