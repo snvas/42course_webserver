@@ -11,14 +11,8 @@ enum State
 	LOCATION
 };
 
-// Estrutura básica para um bloco de configuração.
-struct ConfigBlock
-{
-	std::map<std::string, std::vector<std::string> > directives;
-};
-
 // Estrutura para configuração de uma localização.
-struct LocationConfig : public ConfigBlock
+struct LocationConfig
 {
 	std::vector<std::string> accepted_methods;
 	std::string path_dir;
@@ -28,14 +22,12 @@ struct LocationConfig : public ConfigBlock
 	std::string directory_listing;
 	std::string default_file;
 	std::string upload_path;
-
 	LocationConfig() {}
 };
 
 // Estrutura para configuração de um servidor.
-struct ServerConfig : public ConfigBlock
+struct ServerConfig
 {
-	// std::string host;
 	int listen_port;
 	std::string server_name;
 	int client_max_body_size;
@@ -46,16 +38,14 @@ struct ServerConfig : public ConfigBlock
 	std::string root;
 	std::vector<std::string> cgi_extensions;
 	std::map<std::string, LocationConfig> locations;
-
 	ServerConfig();
 	~ServerConfig();
 };
+
 void printServerConfigurations(const std::vector<ServerConfig> &servers);
 std::vector<ServerConfig> parseConfiguration(const std::string &config);
-void processLocationDirective(const std::string &line,
-			      LocationConfig &currentLocation);
-void processServerDirective(const std::string &line,
-			    ServerConfig &currentServer);
+void processLocationDirective(const std::string &line, LocationConfig &currentLocation);
+void processServerDirective(const std::string &line, ServerConfig &currentServer);
 std::vector<std::string> extractMultipleWords(std::stringstream &ss);
 std::string trim(const std::string &str);
 std::string checkCommandLineArguments(int argc, char **argv);

@@ -1,6 +1,7 @@
 NAME = webserv
 
-CC = clang++
+CC = c++
+#CC = clang++
 
 RM = rm -rf
 

@@ -26,7 +26,7 @@ class Request
 
 class RequestParser
 {
-      public:
+	public:
 		Request parsingRequest(const std::string &rawRequest);
 };
 
