@@ -109,8 +109,7 @@ void processServerDirective(const std::string &line,
 	}
 	else if (directive == "error_page")
 	{
-		currentServer.default_error_page =
-		    extractMultipleWords(lineStream);
+		currentServer.default_error_page = extractMultipleWords(lineStream);
 	}
 	else if (directive == "cgi")
 	{
@@ -134,8 +133,7 @@ void processLocationDirective(const std::string &line,
 
 	if (directive == "allow_method")
 	{
-		currentLocation.accepted_methods =
-		    extractMultipleWords(lineStream);
+		currentLocation.accepted_methods = extractMultipleWords(lineStream);
 	}
 	else if (directive == "location")
 	{
@@ -151,8 +149,7 @@ void processLocationDirective(const std::string &line,
 	}
 	else if (directive == "cgi")
 	{
-		currentLocation.cgi_extensions =
-		    extractMultipleWords(lineStream);
+		currentLocation.cgi_extensions = extractMultipleWords(lineStream);
 	}
 	else if (directive == "http_redirect")
 	{
@@ -198,8 +195,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 		if (line == "{")
 			continue;
 
-		// Trata o fim de blocos de configuração (seja server ou
-		// location)
+		// Trata o fim de blocos de configuração (seja server ou location)
 		if (line == "}")
 		{
 			// Se estivermos em um bloco de localização, adicionamos
@@ -209,14 +205,12 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 				currentServer
 				    .locations[currentLocation.path_dir] =
 				    currentLocation;
-				currentLocation.directives.clear();
 				currentState = SERVER;
 			}
 			else if (currentState == SERVER)
 			{ // Se estivermos em um bloco de servidor, adicionamos
 			  // o servidor à lista de servidores
 				servers.push_back(currentServer);
-				currentServer.directives.clear();
 				currentServer.locations.clear();
 				currentState = START;
 			}
@@ -232,8 +226,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 		{
 		case START:
 		{
-			// Se encontrarmos a palavra "server", entramos no
-			// estado SERVER
+			// Se encontrarmos a palavra "server", entramos no estado SERVER
 			if (line.find("server") != std::string::npos)
 			{
 				currentState = SERVER;
@@ -372,8 +365,7 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 			if (!location.cgi_extensions.empty())
 			{
 				std::cout << "\t\tcgi ";
-				for (std::vector<std::string>::const_iterator
-					 cgiLocIt =
+				for (std::vector<std::string>::const_iterator cgiLocIt =
 					     location.cgi_extensions.begin();
 				     cgiLocIt != location.cgi_extensions.end();
 				     ++cgiLocIt)
@@ -385,8 +377,7 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 				  << std::endl; // Encerra bloco de localização
 		}
 		if (!serverIt->root.empty())
-			std::cout << "\troot " << serverIt->root << ";"
-				  << std::endl;
+			std::cout << "\troot " << serverIt->root << ";" << std::endl;
 
 		std::cout << "}" << std::endl; // Encerra bloco de servidor
 	}
