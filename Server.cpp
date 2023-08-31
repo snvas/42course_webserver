@@ -118,7 +118,6 @@ void Server::run(){
 
 void Server::handleIncomingRequest()
 {
-
 	for (size_t i = 0; i < m_pollfds.size(); ++i)
 	{
 		if (m_pollfds[i].revents & POLLIN)
