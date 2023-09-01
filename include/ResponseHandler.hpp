@@ -8,7 +8,6 @@ struct Response
 {
 	std::string httpVersion;
 	int statusCode;
-	std::string statusMessage;
 	std::map<std::string, std::string> headers;
 	std::string body;
 };

@@ -198,6 +198,9 @@ void Server::processClientRequest(size_t i)
 		std::string response = handler.getResponse();
 		std::cout << "\n\nresponse: \n" << response << std::endl;
 		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
+
+		// TODO: verificar se é necessário fazer algo com poll ao fechar o fd
+		close(m_pollfds[i].fd);
 	}
 }
 
