@@ -2,20 +2,24 @@
 #define RESPONSEHANDLER_HPP
 
 #include "RequestParser.hpp"
+#include "StatusCode.hpp"
 #include "CommonLibs.hpp"
 
 struct Response
 {
 	std::string httpVersion;
 	int statusCode;
-	std::string statusMessage;
 	std::map<std::string, std::string> headers;
 	std::string body;
 };
 
 class ResponseHandler{
 	public:
-		Response generateResponse(const Request& req);
+		Response _res;
+		StatusCode _statusCode;
+
+		ResponseHandler(const Request& req);
+		std::string getResponse();
 
 		Response generate404BadRequest();
 		void MimeType();

@@ -22,7 +22,7 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 	std::stringstream requestStream(rawRequest);
 	std::string line;
 
-	if (std::getline(requestStream, line)){
+	if (std::getline(requestStream, line)) {
 		std::istringstream lineStream(line);
 		lineStream >> req.method >> req.uri >> req.httpVersion;
 
@@ -34,6 +34,7 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 	}
 
 	std::ostringstream bodyStream;
+
 	bool readingBody = false;
 	while (std::getline(requestStream, line))
 	{
@@ -47,15 +48,15 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 				std::string headername = line.substr(0, delimiterPos);
 				std::string headerValue = line.substr(delimiterPos + 2, line.length() - delimiterPos - 2 -1);// -1 para remover o '\r'
 
-				if (headername == "host"){
-				size_t portPos = headerValue.find(":");
-				if (portPos != std::string::npos){
-					req.host = headerValue.substr(0, portPos);
-					req.port = headerValue.substr(portPos + 1);
-				} else {
-					req.host = headerValue;
-					req.port = "80";
-				}
+				if (headername == "Host") {
+					size_t portPos = headerValue.find(":");
+					if (portPos != std::string::npos){
+						req.host = headerValue.substr(0, portPos);
+						req.port = headerValue.substr(portPos + 1);
+					} else {
+						req.host = headerValue;
+						req.port = "80";
+					}
 				} else if (headername == "Content-Lenght"){
 					req.content_lenght = headerValue;
 				} else if (headername == "Content-type"){

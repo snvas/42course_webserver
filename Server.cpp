@@ -118,7 +118,6 @@ void Server::run(){
 
 void Server::handleIncomingRequest()
 {
-
 	for (size_t i = 0; i < m_pollfds.size(); ++i)
 	{
 		if (m_pollfds[i].revents & POLLIN)
@@ -194,10 +193,14 @@ void Server::processClientRequest(size_t i)
 		if (!request.body.empty()){
 			std::cout << "Body:\n " << request.body << std::endl;
 		}
-		send(m_pollfds[i].fd, buffer, bytesRead, 0);
 
-		ResponseHandler responseHandler;
-		Response response = responseHandler.generateResponse(request);
+		ResponseHandler handler(request);
+		std::string response = handler.getResponse();
+		std::cout << "\n\nresponse: \n" << response << std::endl;
+		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
+
+		// TODO: verificar se é necessário fazer algo com poll ao fechar o fd
+		// close(m_pollfds[i].fd);
 	}
 }
 
