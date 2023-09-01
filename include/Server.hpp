@@ -6,6 +6,7 @@
 #include "Server.hpp"
 #include "RequestParser.hpp"
 #include "ResponseHandler.hpp"
+#include "StatusCode.hpp"
 
 class Server{
 	public:

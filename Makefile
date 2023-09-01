@@ -13,7 +13,8 @@ SRCS = 	main.cpp \
 		Parser.cpp \
 		Server.cpp \
 		RequestParser.cpp \
-		ResponseHandler.cpp
+		ResponseHandler.cpp \
+		StatusCode.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
