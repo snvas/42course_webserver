@@ -22,7 +22,7 @@ ResponseHandler::ResponseHandler(const Request& req){
 std::string ResponseHandler::getResponse() {
     std::string response;
 	response.append(_res.httpVersion);
-    response.append(getStatusCode(_res.statusCode));
+    response.append(_statusCode.getStatusCode(_res.statusCode));
     response.append("\r\n");
     response.append("Content-Type: ");
     response.append(_res.headers["Content-Type"]);
@@ -118,29 +118,3 @@ bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 // 	res.headers["Content-Length"] = ss.str();
 // 	return res;
 // }
-
-std::string ResponseHandler::getStatusCode(int code)
-{
-	std::map<int, std::string> codeMap;
-    codeMap[200] = "200 OK";
-    codeMap[201] = "201 Created";
-    codeMap[202] = "202 Accepted";
-    codeMap[204] = "204 No Content";
-    codeMap[300] = "300 Multiple Choice";
-    codeMap[301] = "301 Moved Permanently";
-    codeMap[302] = "302 Found";
-    codeMap[400] = "400 Bad Request";
-    codeMap[401] = "401 Unauthorized";
-    codeMap[403] = "403 Forbidden";
-    codeMap[404] = "404 Not Found";
-    codeMap[405] = "405 Method Not Allowed";
-    codeMap[409] = "409 Conflict";
-    codeMap[413] = "413 Request Entity Too Large";
-    codeMap[415] = "415 Unsupported Media Type";
-    codeMap[500] = "500 Internal Server Error";
-    codeMap[502] = "502 Bad Gateway";
-    codeMap[504] = "504 Gateway Timeout";
-    codeMap[505] = "505 HTTP Version Not Supported";
-
-	return(codeMap[code]);
-}

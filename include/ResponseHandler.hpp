@@ -2,6 +2,7 @@
 #define RESPONSEHANDLER_HPP
 
 #include "RequestParser.hpp"
+#include "StatusCode.hpp"
 #include "CommonLibs.hpp"
 
 struct Response
@@ -15,6 +16,7 @@ struct Response
 class ResponseHandler{
 	public:
 		Response _res;
+		StatusCode _statusCode;
 
 		ResponseHandler(const Request& req);
 		std::string getResponse();
@@ -27,7 +29,6 @@ class ResponseHandler{
 		std::map<std::string, std::string> _mimeTypes;
 		bool readFile(const std::string&path, std::string& outContent);
 		bool is_directory(const std::string& path);
-		std::string getStatusCode(int code);
 };
 
 #endif

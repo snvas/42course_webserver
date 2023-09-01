@@ -200,7 +200,7 @@ void Server::processClientRequest(size_t i)
 		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
 
 		// TODO: verificar se é necessário fazer algo com poll ao fechar o fd
-		close(m_pollfds[i].fd);
+		// close(m_pollfds[i].fd);
 	}
 }
 
