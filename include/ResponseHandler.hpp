@@ -15,7 +15,10 @@ struct Response
 
 class ResponseHandler{
 	public:
-		Response generateResponse(const Request& req);
+		Response _res;
+
+		ResponseHandler(const Request& req);
+		std::string getResponse();
 
 		Response generate404BadRequest();
 		void MimeType();
@@ -25,6 +28,7 @@ class ResponseHandler{
 		std::map<std::string, std::string> _mimeTypes;
 		bool readFile(const std::string&path, std::string& outContent);
 		bool is_directory(const std::string& path);
+		std::string getStatusCode(int code);
 };
 
 #endif

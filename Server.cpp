@@ -193,10 +193,11 @@ void Server::processClientRequest(size_t i)
 		if (!request.body.empty()){
 			std::cout << "Body:\n " << request.body << std::endl;
 		}
-		send(m_pollfds[i].fd, buffer, bytesRead, 0);
 
-		ResponseHandler responseHandler;
-		Response response = responseHandler.generateResponse(request);
+		ResponseHandler handler(request);
+		std::string response = handler.getResponse();
+		std::cout << "\n\nresponse: \n" << response << std::endl;
+		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
 	}
 }
 
