@@ -14,7 +14,9 @@ SRCS = 	main.cpp \
 		Server.cpp \
 		RequestParser.cpp \
 		ResponseHandler.cpp \
-		StatusCode.cpp
+		StatusCode.cpp \
+		ResponseHandlerDELETE.cpp \
+		ResponseHandlerCGI.cpp
 
 OBJS = $(SRCS:.cpp=.o)
 
