@@ -1,8 +1,16 @@
 #include "ResponseHandler.hpp"
 
-ResponseHandler::ResponseHandler(const Request& req){
-	_res.httpVersion = "HTTP/1.1 ";
+ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
+	_req(req), _conf(config) {
 
+	_res.httpVersion = "HTTP/1.1 ";
+	_res.statusCode = 0;
+
+	if(hasErrors()) {
+		return;
+	}
+
+	// TODO: lidar com "index doesnotexist hello.html"
 	std::string content;
 	if (readFile(req.uri, content)){
 		_res.statusCode = 200;
@@ -13,10 +21,58 @@ ResponseHandler::ResponseHandler(const Request& req){
 		_res.statusCode = 404;
 		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
 		_res.headers["Content-Type"] = "text/html";
+		// TODO: Procurar default error page, se existir
 	}
-	std::stringstream ss;
-	ss << _res.body.size();
-	_res.headers["Content-Length"] = ss.str();
+	// ??? autoindex precisa ser veririfcado de acordo com método?
+}
+
+template<typename T>
+static bool vectorContains(std::vector<T> vec, T target) {
+	for (size_t i = 0; i < vec.size(); i++) {
+		if(vec[i] == target) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool ResponseHandler::hasErrors() {
+	// check server_name
+	if (_conf.server_name != _req.host) { 
+		_res.statusCode = 400;
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Invalid Host \n";
+	}
+
+	// check max_body_size
+	else if (_conf.client_max_body_size != -1 &&
+		 static_cast<int>(_req.body.size()) > _conf.client_max_body_size) {
+		_res.statusCode = 413;
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Request body too large \n";
+	}
+
+	// check server allowed methods
+	else if (!vectorContains(_conf.allowed_method, _req.method)) {
+		_res.statusCode = 405;
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Method not allowed \n";
+	}
+
+	// check location configs
+	else if (uri_is_location()) {
+		if (!vectorContains(_conf.locations[_req.uri].accepted_methods, _req.method)) {
+			_res.statusCode = 405;
+			_res.headers["Content-Type"] = "text/html";
+			_res.body = "Method not allowed \n";
+		}
+	}
+
+	if (_res.statusCode != 0) {
+		// TODO: Procurar default error page, se existir
+		return true;
+	}
+	return false;
 }
 
 std::string ResponseHandler::getResponse() {
@@ -28,7 +84,9 @@ std::string ResponseHandler::getResponse() {
     response.append(_res.headers["Content-Type"]);
     response.append("\r\n");
     response.append("Content-Length: ");
-    response.append(_res.headers["Content-Length"]);
+	std::stringstream ss;
+	ss << _res.body.size();
+    response.append(ss.str());
     response.append("\r\n");
     response.append("Connection: keep-alive");
     response.append("\r\n\r\n");
@@ -83,6 +141,13 @@ bool ResponseHandler::is_directory(const std::string& path){
 	return false;
 }
 
+bool ResponseHandler::uri_is_location(void) {
+	if(_conf.locations.find(_req.uri) == _conf.locations.end()) {
+		return false;
+	}
+	return true;
+}
+
 bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 {
 
@@ -105,16 +170,3 @@ bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 		return false;
 	}
 }
-
-// Response ResponseHandler::generate404BadRequest(){
-// 	Response res;
-
-// 	res.httpVersion = "HHTP/1.1";
-// 	res.statusCode = 400;
-// 	res.body = "400 Bad Request";
-// 	res.headers["Content-Type"] = "text/html";
-// 	std::stringstream ss;
-// 	ss << res.body.size();
-// 	res.headers["Content-Length"] = ss.str();
-// 	return res;
-// }
