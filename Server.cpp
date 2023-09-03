@@ -157,8 +157,7 @@ void Server::processClientRequest(size_t i)
 	}
 	else
 	{
-		std::string requestString(buffer);
-		requestString = requestString.substr(0, bytesRead);
+		std::string requestString(buffer, bytesRead);
 		RequestParser parser;
 		Request request = parser.parsingRequest(requestString);
 
@@ -194,13 +193,11 @@ void Server::processClientRequest(size_t i)
 			std::cout << "Body:\n " << request.body << std::endl;
 		}
 
-		ResponseHandler handler(request);
+		ResponseHandler handler(request, m_config);
 		std::string response = handler.getResponse();
+
 		std::cout << "\n\nresponse: \n" << response << std::endl;
 		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
-
-		// TODO: verificar se é necessário fazer algo com poll ao fechar o fd
-		// close(m_pollfds[i].fd);
 	}
 }
 
