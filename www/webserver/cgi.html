@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>O que é CGI?</title>
+    <!-- Link para o Bootstrap CSS -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="#">Webserver Explicado</a>
+    </nav>
+
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-md-12">
+          <h1>Você sabe o que é um CGI?</h1>
+          <p>
+            CGI (Common Gateway Interface) é um padrão que permite que
+            servidores web interajam com programas externos para produzir
+            páginas web dinâmicas. Ele é amplamente usado para processar dados
+            de formulários e criar conteúdo dinâmico.
+          </p>
+
+          <h2>Considerações importantes sobre CGI:</h2>
+          <ul>
+            <li>
+              Como você não chamará o CGI diretamente, use o caminho completo
+              como PATH_INFO.
+            </li>
+            <li>
+              Lembre-se de que, para solicitações "chunked", seu servidor
+              precisa desfragmentá-las. O CGI espera EOF (Final de Arquivo) como
+              fim do corpo da mensagem.
+            </li>
+            <li>
+              O mesmo vale para a saída do CGI. Se nenhum "content_length" for
+              retornado do CGI, o EOF marcará o fim dos dados retornados.
+            </li>
+            <li>
+              Seu programa deve chamar o CGI com o arquivo solicitado como
+              primeiro argumento.
+            </li>
+            <li>
+              O CGI deve ser executado no diretório correto para acesso a
+              arquivos com caminho relativo.
+            </li>
+            <li>
+              Seu servidor deve funcionar com um CGI (como php-CGI, Python e
+              assim por diante).
+            </li>
+          </ul>
+
+          <p>
+            Entender a CGI é crucial para desenvolver aplicações web dinâmicas e
+            garantir que os servidores web funcionem corretamente com programas
+            externos.
+          </p>
+		  <a href="index.html">Voltar para a página principal</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts para Bootstrap -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
