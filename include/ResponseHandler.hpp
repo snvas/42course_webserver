@@ -16,14 +16,15 @@ struct Response
 
 class ResponseHandler
 {
-      public:
+public:
 	ResponseHandler(const Request req, const ServerConfig config);
 	std::string getResponse();
 	void handlerDELETE(const Request &req);
 	
-      private:
+private:
 	// Verificar erros nas solicitações e configurações
 	bool hasErrors();
+	
 	 // Detalhes sobre o Request e Config
 	Request _req;
 	ServerConfig _conf;
@@ -40,6 +41,7 @@ class ResponseHandler
 	bool isDirectory(const std::string &path);
 	std::string getPath(std::string uri);
 	bool uriIsLocation(void);
+	void getDefaultErrorPage(void);
 
 	// Manipulação de CGI
 	Response handleCGI(const Request &req, const std::string &cgiPath);

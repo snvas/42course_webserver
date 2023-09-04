@@ -30,7 +30,7 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 		_res.statusCode = 404;
 		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
 		_res.headers["Content-Type"] = "text/html";
-		// TODO: Procurar default error page, se existir
+		getDefaultErrorPage();
 	}
 	// ??? autoindex precisa ser veririfcado de acordo com método?
 }
@@ -78,10 +78,23 @@ bool ResponseHandler::hasErrors() {
 	}
 
 	if (_res.statusCode != 0) {
-		// TODO: Procurar default error page, se existir
+		getDefaultErrorPage();
 		return true;
 	}
 	return false;
+}
+
+void ResponseHandler::getDefaultErrorPage(void) {
+	std::stringstream ss;
+	ss << _res.statusCode;
+	// ??? lidar apenas com uma página de erro? Se lidar com mais do que uma, como deve ser a config de
+	// if (vectorContains(_conf.default_error_page, ss.str())) {
+	if (_conf.default_error_page[0] == ss.str()) {
+		std::string content;
+		if (readFile(_conf.root + _conf.default_error_page[1], content)){
+			_res.body = content;
+		}
+	}
 }
 
 std::string ResponseHandler::getResponse() {
