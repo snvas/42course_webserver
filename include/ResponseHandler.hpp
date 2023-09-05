@@ -1,10 +1,10 @@
 #ifndef RESPONSEHANDLER_HPP
 #define RESPONSEHANDLER_HPP
 
+#include "CommonLibs.hpp"
 #include "RequestParser.hpp"
 #include "Server.hpp"
 #include "StatusCode.hpp"
-#include "CommonLibs.hpp"
 
 struct Response
 {
@@ -14,24 +14,46 @@ struct Response
 	std::string body;
 };
 
-class ResponseHandler{
-	public:
-		Request _req;
-		ServerConfig _conf;
-		Response _res;
-		StatusCode _statusCode;
+class ResponseHandler
+{
+      public:
+	ResponseHandler(const Request req, const ServerConfig config);
+	std::string getResponse();
+	void handlerDELETE(const Request &req);
+	
+      private:
+	// Verificar erros nas solicitações e configurações
+	bool hasErrors();
+	 // Detalhes sobre o Request e Config
+	Request _req;
+	ServerConfig _conf;
+	Response _res;
+	StatusCode _statusCode;
 
-		ResponseHandler(const Request req, const ServerConfig config);
-		void MimeType();
-		std::string getResponse();
-		std::string getMimeType(const std::string& fileExtension);
+	// Manipulação de tipos de arquivos e MIME
+	void MimeType();
+	std::string getMimeType(const std::string &fileExtension);
+	std::map<std::string, std::string> _mimeTypes;
+	
+	// Manipulação de arquivos e diretórios
+	bool readFile(const std::string &path, std::string &outContent);
+	bool isDirectory(const std::string &path);
+	std::string getPath(std::string uri);
+	bool uriIsLocation(void);
 
-	private:
-		std::map<std::string, std::string> _mimeTypes;
-		bool readFile(const std::string&path, std::string& outContent);
-		bool is_directory(const std::string& path);
-		bool uri_is_location(void);
-		bool hasErrors();
+	// Manipulação de CGI
+	Response handleCGI(const Request &req, const std::string &cgiPath);
+	bool isValidCGIScript(const std::string &cgiPath);
+	void setupEnviroment(const Request &req, std::vector<std::string> &envVec,
+		     char **&envp);
+	void executeCGIInChild(const std::string &cgiPath, char **envp, int pipefd[]);
+	std::string readCGIOutput(int pipefd[]);
+	bool isCGIRequest(const std::string& uri);
+	std::string getCgiPathFromUri(const std::string& uri);
+	
+	// Gerar respostas de erro
+	Response generate500InternalServerError();
 };
+
 
 #endif

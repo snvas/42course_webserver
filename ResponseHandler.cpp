@@ -10,6 +10,15 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 		return;
 	}
 
+	if (_req.method == "DELETE"){
+		handlerDELETE(_req);
+		return;
+	}
+
+	if (isCGIRequest(_req.uri)){
+		_res = handleCGI(_req, getCgiPathFromUri(_req.uri));
+	}
+
 	// TODO: lidar com "index doesnotexist hello.html"
 	std::string content;
 	if (readFile(req.uri, content)){
@@ -60,7 +69,7 @@ bool ResponseHandler::hasErrors() {
 	}
 
 	// check location configs
-	else if (uri_is_location()) {
+	else if (uriIsLocation()) {
 		if (!vectorContains(_conf.locations[_req.uri].accepted_methods, _req.method)) {
 			_res.statusCode = 405;
 			_res.headers["Content-Type"] = "text/html";
@@ -133,7 +142,7 @@ std::string ResponseHandler::getMimeType(const std::string &fileExtension)
 	return _mimeTypes[fileExtension];
 }
 
-bool ResponseHandler::is_directory(const std::string& path){
+bool ResponseHandler::isDirectory(const std::string& path){
 	struct stat s;
 	if (stat(path.c_str(), &s) == 0){
 		return S_ISDIR(s.st_mode);
@@ -141,7 +150,7 @@ bool ResponseHandler::is_directory(const std::string& path){
 	return false;
 }
 
-bool ResponseHandler::uri_is_location(void) {
+bool ResponseHandler::uriIsLocation(void) {
 	if(_conf.locations.find(_req.uri) == _conf.locations.end()) {
 		return false;
 	}
@@ -151,7 +160,7 @@ bool ResponseHandler::uri_is_location(void) {
 bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 {
 
-	if (is_directory(path))
+	if (isDirectory(path))
 	{
 		std::cout << path << "é um diretório!" << std::endl;
 		return false;
