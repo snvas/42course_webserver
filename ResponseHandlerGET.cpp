@@ -1,5 +1,5 @@
 #include "ResponseHandler.hpp"
 
-void ResponseHandler::handleGet(void) {
+void ResponseHandler::handlerGET(void) {
 	
 }

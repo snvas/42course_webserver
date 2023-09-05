@@ -15,6 +15,7 @@ SRCS = 	main.cpp \
 		RequestParser.cpp \
 		ResponseHandler.cpp \
 		StatusCode.cpp \
+		ResponseHandlerGET.cpp \
 		ResponseHandlerDELETE.cpp \
 		ResponseHandlerCGI.cpp
 

@@ -9,28 +9,22 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 	if(hasErrors()) {
 		return;
 	}
+	
+	if (_req.method == "GET") {
+		handlerGET();
+	} else if (_req.method == "DELETE") {
+		handlerDELETE();
+	} else if (_req.method == "POST") {
+		// handlerPOST();
+	} else {
 
-	if (_req.method == "DELETE"){
-		handlerDELETE(_req);
-		return;
 	}
-
 	if (isCGIRequest(_req.uri)){
-		_res = handleCGI(_req, getCgiPathFromUri(_req.uri));
+		handleCGI(getCgiPathFromUri(_req.uri));
 	}
 
 	// TODO: lidar com "index doesnotexist hello.html"
 	// ??? autoindex precisa ser veririfcado de acordo com método?
-
-	if (_req.method == "GET") {
-		handleGet();
-	} else if (_req.method == "POST") {
-		// handlePost();
-	} else if (_req.method == "DELETE") {
-		// handleDelete();
-	} else {
-
-	}
 
 	std::string content;
 	if (readFile(req.uri, content)){
@@ -95,14 +89,17 @@ void ResponseHandler::generateErrorResponse (int code) {
 		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
 		_res.headers["Content-Type"] = "text/html";
 		break;
-	case 413:
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Request body too large \n";
-		break;
 	case 405:
 		_res.headers["Content-Type"] = "text/html";
 		_res.body = "Method not allowed \n";
 		break;
+	case 413:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Request body too large \n";
+		break;
+	case 500:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
 	default:
 		break;
 	}
