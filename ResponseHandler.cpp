@@ -20,19 +20,26 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 	}
 
 	// TODO: lidar com "index doesnotexist hello.html"
+	// ??? autoindex precisa ser veririfcado de acordo com método?
+
+	if (_req.method == "GET") {
+		handleGet();
+	} else if (_req.method == "POST") {
+		// handlePost();
+	} else if (_req.method == "DELETE") {
+		// handleDelete();
+	} else {
+
+	}
+
 	std::string content;
 	if (readFile(req.uri, content)){
 		_res.statusCode = 200;
 		_res.body = content;
-
 		_res.headers["Content-Type"] = "text/html";
 	} else {
-		_res.statusCode = 404;
-		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
-		_res.headers["Content-Type"] = "text/html";
-		getDefaultErrorPage();
+		generateErrorResponse(404);
 	}
-	// ??? autoindex precisa ser veririfcado de acordo com método?
 }
 
 template<typename T>
@@ -48,40 +55,58 @@ static bool vectorContains(std::vector<T> vec, T target) {
 bool ResponseHandler::hasErrors() {
 	// check server_name
 	if (_conf.server_name != _req.host) { 
-		_res.statusCode = 400;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Invalid Host \n";
+		generateErrorResponse(400);
 	}
 
 	// check max_body_size
 	else if (_conf.client_max_body_size != -1 &&
 		 static_cast<int>(_req.body.size()) > _conf.client_max_body_size) {
-		_res.statusCode = 413;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Request body too large \n";
+		generateErrorResponse(413);
 	}
 
 	// check server allowed methods
 	else if (!vectorContains(_conf.allowed_method, _req.method)) {
-		_res.statusCode = 405;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Method not allowed \n";
+		generateErrorResponse(405);
 	}
 
 	// check location configs
 	else if (uriIsLocation()) {
 		if (!vectorContains(_conf.locations[_req.uri].accepted_methods, _req.method)) {
-			_res.statusCode = 405;
-			_res.headers["Content-Type"] = "text/html";
-			_res.body = "Method not allowed \n";
+			generateErrorResponse(405);
 		}
 	}
 
 	if (_res.statusCode != 0) {
-		getDefaultErrorPage();
 		return true;
 	}
 	return false;
+}
+
+void ResponseHandler::generateErrorResponse (int code) {
+	_res.statusCode = code;
+
+	switch (code)
+	{
+	case 400:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Invalid Host \n";
+		break;
+	case 404:
+		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
+		_res.headers["Content-Type"] = "text/html";
+		break;
+	case 413:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Request body too large \n";
+		break;
+	case 405:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Method not allowed \n";
+		break;
+	default:
+		break;
+	}
+	getDefaultErrorPage();
 }
 
 void ResponseHandler::getDefaultErrorPage(void) {
