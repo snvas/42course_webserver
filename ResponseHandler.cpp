@@ -214,3 +214,13 @@ bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 		return false;
 	}
 }
+
+std::string ResponseHandler::getPath(std::string uri){
+	std::string rootDir = _conf.root;
+	std::string path = rootDir + uri;
+
+	if (path[path.length() - 1] == '/'){
+		path.append("index.html");
+	}
+	return path;
+}

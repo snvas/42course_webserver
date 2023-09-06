@@ -27,16 +27,6 @@ static bool fileExists(const std::string& filePath){
 	return (stat(filePath.c_str(), &buffer) == 0);
 }
 
-std::string ResponseHandler::getPath(std::string uri){
-	std::string rootDir = _conf.root;
-	std::string path = rootDir + uri;
-
-	if (path[path.length() - 1] == '/'){
-		path.append("index.html");
-	}
-	return path;
-}
-
 void ResponseHandler::handlerDELETE()
 {
 	// Obter o caminho absoluto do arquivo a ser excluído
