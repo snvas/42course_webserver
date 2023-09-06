@@ -241,6 +241,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 			// estado LOCATION
 			if (line.find("location") != std::string::npos)
 			{
+				initLocation(currentLocation);
 				lineStream >> directive >>
 				    currentLocation.path_dir;
 				currentState = LOCATION;
@@ -259,6 +260,18 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 		}
 	}
 	return servers;
+}
+
+void initLocation(LocationConfig &currentLocation)
+{
+	currentLocation.accepted_methods.clear();
+	currentLocation.path_dir.clear();
+	currentLocation.root.clear();
+	currentLocation.cgi_extensions.clear();
+	currentLocation.redirect.clear();
+	currentLocation.directory_listing.clear();
+	currentLocation.default_file.clear();
+	currentLocation.upload_path.clear();
 }
 
 void printServerConfigurations(const std::vector<ServerConfig> &servers)
