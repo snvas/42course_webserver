@@ -31,6 +31,9 @@ $(NAME): $(OBJS)
 		$(CC) $(CFLAGS) $(INC) -c $< -o $@
 		@echo "Compile "$<" successully!"
 
+valgrind: $(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all ./$(NAME) config/config.conf
+
 clean:
 		$(RM) $(OBJS)
 		@echo "Cleanup successully!"
