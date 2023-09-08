@@ -58,12 +58,11 @@ void ResponseHandler::handlerGET(void)
 		std::string path = getPath(sanitizedUri);
 		if (isDirectory(path))
 		{
-			if (isFile(getPath(sanitizedUri + "/" +
-					   _locationConf->default_file)))
+			if (isFile(
+			        getPath(sanitizedUri + "/" + _locationConf->default_file)))
 			{
 				generateResponseFromFile(
-				    getPath(sanitizedUri + "/" +
-					    _locationConf->default_file));
+				    getPath(sanitizedUri + "/" + _locationConf->default_file));
 			}
 			else
 			{
@@ -103,8 +102,7 @@ void ResponseHandler::handlerGET(void)
 
 bool ResponseHandler::hasRedirect(void)
 {
-	if (!_locationConf)
-		return false;
+	if (!_locationConf) return false;
 
 	if (!_locationConf->redirect.empty())
 	{
@@ -118,8 +116,8 @@ void ResponseHandler::generate301RedirectResponse(std::string location)
 	_res.statusCode = 301;
 	_res.headers["Content-Type"] = getMimeType(".html");
 	_res.body = "<html><head><title>301 Moved "
-		    "Permanently</title><script>window.location.replace('" +
-		    location + "');</script></head></html>";
+	            "Permanently</title><script>window.location.replace('" +
+	            location + "');</script></head></html>";
 }
 
 void ResponseHandler::generateResponseFromFile(std::string path)
@@ -151,17 +149,16 @@ void ResponseHandler::generateDirectoryListining(std::string path)
 		_res.httpVersion = "HTTP/1.1";
 		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body.append("<html><head><title>Index of " + path +
-				 "</title></head>"
-				 "<body><h1>Index of " +
-				 path + "</h1>");
+		                 "</title></head>"
+		                 "<body><h1>Index of " +
+		                 path + "</h1>");
 		while ((ent = readdir(dir)) != NULL)
 		{
 			std::string name = ent->d_name;
 			if (name != "." && name != "..")
 			{
-				_res.body.append("<a href=\"" + _req.uri + "/" +
-						 name + "\">" + name +
-						 "</a><br>");
+				_res.body.append("<a href=\"" + _req.uri + "/" + name + "\">" +
+				                 name + "</a><br>");
 			}
 		}
 		_res.body.append("</body></html>");

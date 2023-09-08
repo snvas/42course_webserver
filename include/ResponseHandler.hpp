@@ -21,12 +21,12 @@ public:
 	std::string getResponse();
 	void handlerGET();
 	void handlerDELETE();
-	
+
 private:
 	// Verificar erros nas solicitações e configurações
 	bool hasErrors();
-	
-	 // Detalhes sobre o Request e Config
+
+	// Detalhes sobre o Request e Config
 	Request _req;
 	ServerConfig _conf;
 	Response _res;
@@ -37,7 +37,7 @@ private:
 	void MimeType();
 	std::string getMimeType(const std::string &fileExtension);
 	std::map<std::string, std::string> _mimeTypes;
-	
+
 	// Manipulação de arquivos e diretórios
 	bool readFile(const std::string &path, std::string &outContent);
 	bool isDirectory(const std::string &path);
@@ -49,20 +49,19 @@ private:
 	void handleCGI(const std::string &cgiPath);
 	bool isValidCGIScript(const std::string &cgiPath);
 	void setupEnviroment(std::vector<std::string> &envVec, char **&envp);
-	void executeCGIInChild(const std::string &cgiPath, char **envp, int pipefd[]);
+	void executeCGIInChild(const std::string &cgiPath, char **envp,
+	                       int pipefd[]);
 	std::string readCGIOutput(int pipefd[]);
-	bool isCGIRequest(const std::string& uri);
-	std::string getCgiPathFromUri(const std::string& uri);
-	
+	bool isCGIRequest(const std::string &uri);
+	std::string getCgiPathFromUri(const std::string &uri);
+
 	// Gerar respostas de erro
 	void generateErrorResponse(int code);
 
 	bool hasRedirect(void);
 	void generate301RedirectResponse(std::string location);
-	void generateResponseFromFile (std::string file);
+	void generateResponseFromFile(std::string file);
 	void generateDirectoryListining(std::string path);
-
 };
-
 
 #endif

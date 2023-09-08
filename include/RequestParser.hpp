@@ -5,7 +5,7 @@
 
 class Request
 {
-	public:
+public:
 	std::string method;
 	std::string host;
 	std::string port;
@@ -26,8 +26,8 @@ class Request
 
 class RequestParser
 {
-	public:
-		Request parsingRequest(const std::string &rawRequest);
+public:
+	Request parsingRequest(const std::string &rawRequest);
 };
 
 #endif

@@ -2,15 +2,17 @@
 
 std::string trim(const std::string &str);
 std::vector<std::string> extractMultipleWords(std::stringstream &ss);
-void processServerDirective(const std::string &line, ServerConfig &currentServer);
-void processLocationDirective(const std::string &line, LocationConfig &currentLocation);
+void processServerDirective(const std::string &line,
+                            ServerConfig &currentServer);
+void processLocationDirective(const std::string &line,
+                              LocationConfig &currentLocation);
 
 std::string checkCommandLineArguments(int argc, char **argv)
 {
 	if (argc != 2)
 	{
 		std::cerr << "Uso: " << argv[0] << " <path_to_config_file>"
-			  << std::endl;
+		          << std::endl;
 		std::exit(1); // Encerra o programa
 	}
 	return std::string(argv[1]); // Retorna o caminho do arquivo
@@ -21,12 +23,11 @@ std::string readConfigFile(const std::string &path)
 	std::ifstream configFile(path.c_str());
 	if (!configFile.is_open())
 	{
-		std::cerr << "Erro ao abrir o arquivo de configuração."
-			  << std::endl;
+		std::cerr << "Erro ao abrir o arquivo de configuração." << std::endl;
 		std::exit(1); // Encerra o programa
 	}
 	std::string config((std::istreambuf_iterator<char>(configFile)),
-			   std::istreambuf_iterator<char>());
+	                   std::istreambuf_iterator<char>());
 	configFile.close();
 	return config; // Retorna o conteúdo do arquivo
 }
@@ -37,7 +38,9 @@ ServerConfig::ServerConfig()
 {
 }
 
-ServerConfig::~ServerConfig() {}
+ServerConfig::~ServerConfig()
+{
+}
 
 // Função que retira espaços em branco no início e no final da string dada
 std::string trim(const std::string &str)
@@ -61,7 +64,8 @@ std::vector<std::string> extractMultipleWords(std::stringstream &ss)
 {
 	std::vector<std::string> words;
 	std::string word;
-	while (ss >> word) {
+	while (ss >> word)
+	{
 		words.push_back(word);
 	}
 	return words;
@@ -69,7 +73,7 @@ std::vector<std::string> extractMultipleWords(std::stringstream &ss)
 
 // Function to process server directives
 void processServerDirective(const std::string &line,
-			    ServerConfig &currentServer)
+                            ServerConfig &currentServer)
 {
 	std::stringstream lineStream(line);
 	std::string directive;
@@ -125,7 +129,7 @@ void processServerDirective(const std::string &line,
 
 // Function to process location directives
 void processLocationDirective(const std::string &line,
-			      LocationConfig &currentLocation)
+                              LocationConfig &currentLocation)
 {
 	std::stringstream lineStream(line);
 	std::string directive;
@@ -192,8 +196,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 		line = trim(line);
 
 		// Ignora as linhas que contêm apenas '{'
-		if (line == "{")
-			continue;
+		if (line == "{") continue;
 
 		// Trata o fim de blocos de configuração (seja server ou location)
 		if (line == "}")
@@ -202,8 +205,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 			// a localização atual ao servidor atual
 			if (currentState == LOCATION)
 			{
-				currentServer
-				    .locations[currentLocation.path_dir] =
+				currentServer.locations[currentLocation.path_dir] =
 				    currentLocation;
 				currentState = SERVER;
 			}
@@ -242,8 +244,7 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 			if (line.find("location") != std::string::npos)
 			{
 				initLocation(currentLocation);
-				lineStream >> directive >>
-				    currentLocation.path_dir;
+				lineStream >> directive >> currentLocation.path_dir;
 				currentState = LOCATION;
 			}
 			else
@@ -276,34 +277,31 @@ void initLocation(LocationConfig &currentLocation)
 
 void printServerConfigurations(const std::vector<ServerConfig> &servers)
 {
-	for (std::vector<ServerConfig>::const_iterator serverIt =
-		 servers.begin();
+	for (std::vector<ServerConfig>::const_iterator serverIt = servers.begin();
 	     serverIt != servers.end(); ++serverIt)
 	{
 		std::cout << "server {" << std::endl;
 		if (serverIt->listen_port != 0)
 			std::cout << "\tlisten " << serverIt->listen_port << ";"
-				  << std::endl;
+			          << std::endl;
 
 		if (!serverIt->server_name.empty())
-			std::cout << "\tserver_name " << serverIt->server_name
-				  << ";" << std::endl;
+			std::cout << "\tserver_name " << serverIt->server_name << ";"
+			          << std::endl;
 
 		if (serverIt->client_max_body_size != 0)
 			std::cout << "\tclient_max_body_size "
-				  << serverIt->client_max_body_size << ";"
-				  << std::endl;
+			          << serverIt->client_max_body_size << ";" << std::endl;
 
 		if (!serverIt->directory_listing.empty())
-			std::cout << "\tautoindex "
-				  << serverIt->directory_listing << ";"
-				  << std::endl;
+			std::cout << "\tautoindex " << serverIt->directory_listing << ";"
+			          << std::endl;
 
 		if (!serverIt->index.empty())
 		{
 			std::cout << "\tindex ";
 			for (std::vector<std::string>::const_iterator indexIt =
-				 serverIt->index.begin();
+			         serverIt->index.begin();
 			     indexIt != serverIt->index.end(); ++indexIt)
 				std::cout << *indexIt << " ";
 			std::cout << ";" << std::endl;
@@ -312,9 +310,8 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 		{
 			std::cout << "\tallowed_methods ";
 			for (std::vector<std::string>::const_iterator methodIt =
-				 serverIt->allowed_method.begin();
-			     methodIt != serverIt->allowed_method.end();
-			     ++methodIt)
+			         serverIt->allowed_method.begin();
+			     methodIt != serverIt->allowed_method.end(); ++methodIt)
 				std::cout << *methodIt << " ";
 			std::cout << ";" << std::endl;
 		}
@@ -323,54 +320,46 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 		{
 			std::cout << "\tcgi ";
 			for (std::vector<std::string>::const_iterator cgiIt =
-				 serverIt->cgi_extensions.begin();
+			         serverIt->cgi_extensions.begin();
 			     cgiIt != serverIt->cgi_extensions.end(); ++cgiIt)
 				std::cout << *cgiIt << " ";
 			std::cout << ";" << std::endl;
 		}
 
-		for (std::map<std::string, LocationConfig>::const_iterator
-			 locIt = serverIt->locations.begin();
+		for (std::map<std::string, LocationConfig>::const_iterator locIt =
+		         serverIt->locations.begin();
 		     locIt != serverIt->locations.end(); ++locIt)
 		{
 			const LocationConfig &location = locIt->second;
 
 			std::cout << "\tlocation " << location.path_dir << " {"
-				  << std::endl;
+			          << std::endl;
 
 			if (!location.root.empty())
-				std::cout << "\t\troot " << location.root << ";"
-					  << std::endl;
+				std::cout << "\t\troot " << location.root << ";" << std::endl;
 
 			if (!location.redirect.empty())
-				std::cout << "\t\thttp_redirect "
-					  << location.redirect << ";"
-					  << std::endl;
+				std::cout << "\t\thttp_redirect " << location.redirect << ";"
+				          << std::endl;
 
 			if (!location.directory_listing.empty())
-				std::cout << "\t\tautoindex "
-					  << location.directory_listing << ";"
-					  << std::endl;
+				std::cout << "\t\tautoindex " << location.directory_listing
+				          << ";" << std::endl;
 
 			if (!location.default_file.empty())
-				std::cout << "\t\tdefault_file "
-					  << location.default_file << ";"
-					  << std::endl;
+				std::cout << "\t\tdefault_file " << location.default_file << ";"
+				          << std::endl;
 
 			if (!location.upload_path.empty())
-				std::cout << "\t\tupload_path "
-					  << location.upload_path << ";"
-					  << std::endl;
+				std::cout << "\t\tupload_path " << location.upload_path << ";"
+				          << std::endl;
 
 			if (!location.accepted_methods.empty())
 			{
 				std::cout << "\t\tallow_method ";
-				for (std::vector<std::string>::const_iterator
-					 methodIt =
-					     location.accepted_methods.begin();
-				     methodIt !=
-				     location.accepted_methods.end();
-				     ++methodIt)
+				for (std::vector<std::string>::const_iterator methodIt =
+				         location.accepted_methods.begin();
+				     methodIt != location.accepted_methods.end(); ++methodIt)
 					std::cout << *methodIt << " ";
 				std::cout << ";" << std::endl;
 			}
@@ -379,15 +368,13 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 			{
 				std::cout << "\t\tcgi ";
 				for (std::vector<std::string>::const_iterator cgiLocIt =
-					     location.cgi_extensions.begin();
-				     cgiLocIt != location.cgi_extensions.end();
-				     ++cgiLocIt)
+				         location.cgi_extensions.begin();
+				     cgiLocIt != location.cgi_extensions.end(); ++cgiLocIt)
 					std::cout << *cgiLocIt << " ";
 				std::cout << ";" << std::endl;
 			}
 
-			std::cout << "\t}"
-				  << std::endl; // Encerra bloco de localização
+			std::cout << "\t}" << std::endl; // Encerra bloco de localização
 		}
 		if (!serverIt->root.empty())
 			std::cout << "\troot " << serverIt->root << ";" << std::endl;

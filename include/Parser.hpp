@@ -22,7 +22,9 @@ struct LocationConfig
 	std::string directory_listing;
 	std::string default_file;
 	std::string upload_path;
-	LocationConfig() {}
+	LocationConfig()
+	{
+	}
 };
 
 // Estrutura para configuração de um servidor.
@@ -45,8 +47,10 @@ struct ServerConfig
 void initLocation(LocationConfig &currentLocation);
 void printServerConfigurations(const std::vector<ServerConfig> &servers);
 std::vector<ServerConfig> parseConfiguration(const std::string &config);
-void processLocationDirective(const std::string &line, LocationConfig &currentLocation);
-void processServerDirective(const std::string &line, ServerConfig &currentServer);
+void processLocationDirective(const std::string &line,
+                              LocationConfig &currentLocation);
+void processServerDirective(const std::string &line,
+                            ServerConfig &currentServer);
 std::vector<std::string> extractMultipleWords(std::stringstream &ss);
 std::string trim(const std::string &str);
 std::string checkCommandLineArguments(int argc, char **argv);
