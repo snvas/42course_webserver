@@ -1,28 +1,28 @@
 #include "ResponseHandler.hpp"
 
-void ResponseHandler::setupEnviroment(const Request &req, std::vector<std::string> &envVec,
+void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
 		     char **&envp)
 {
-	envVec.push_back("AUTH_TYPE=" + req.authorization);
+	envVec.push_back("AUTH_TYPE=" + _req.authorization);
 	envVec.push_back("REDIRECT_STATUS=200");
 	envVec.push_back("GATEWAY_INTEFACE=CGI/1.1");
-	envVec.push_back("SCRIPT_NAME=" + req.cgi_path);
-	envVec.push_back("SCRIPT_FILENAME" + req.cgi_path);
-	envVec.push_back("REQUEST_METHOD" + req.method);
-	envVec.push_back("CONTENT_LENGTH=" + req.content_lenght);
-	envVec.push_back("CONTENT_TYPE=" + req.content_type);
-	envVec.push_back("PATH_INFO=" + req.cgi_path);
-	envVec.push_back("PATH_TRANSLATED=" + req.cgi_path);
-	envVec.push_back("QUERY_STRING=" + req.query);
-	envVec.push_back("REMOTE_ADDR=" + req.port);
-	envVec.push_back("REMOTE_IDENT=" + req.authorization);
-	envVec.push_back("REMOTE_USER=" + req.authorization);
-	envVec.push_back("REQUEST_URI=" + req.cgi_path + "?" + req.query);
-	envVec.push_back("SERVER_NAME=" + req.host);
+	envVec.push_back("SCRIPT_NAME=" + _req.cgi_path);
+	envVec.push_back("SCRIPT_FILENAME" + _req.cgi_path);
+	envVec.push_back("REQUEST_METHOD" + _req.method);
+	envVec.push_back("CONTENT_LENGTH=" + _req.content_lenght);
+	envVec.push_back("CONTENT_TYPE=" + _req.content_type);
+	envVec.push_back("PATH_INFO=" + _req.cgi_path);
+	envVec.push_back("PATH_TRANSLATED=" + _req.cgi_path);
+	envVec.push_back("QUERY_STRING=" + _req.query);
+	envVec.push_back("REMOTE_ADDR=" + _req.port);
+	envVec.push_back("REMOTE_IDENT=" + _req.authorization);
+	envVec.push_back("REMOTE_USER=" + _req.authorization);
+	envVec.push_back("REQUEST_URI=" + _req.cgi_path + "?" + _req.query);
+	envVec.push_back("SERVER_NAME=" + _req.host);
 	envVec.push_back("SERVER_PROTOCOL=http/1.1");
 	envVec.push_back("SERVER_SOFTWARE=Webserver/1.0");
-	envVec.push_back("HTTP_USER_AGENT=" + req.user_agent);
-	envVec.push_back("HTTP_ACCEPT=" + req.accept);
+	envVec.push_back("HTTP_USER_AGENT=" + _req.user_agent);
+	envVec.push_back("HTTP_ACCEPT=" + _req.accept);
 
 	envp = new char *[envVec.size() + 1];
 	for (size_t i = 0; i < envVec.size(); ++i)
@@ -60,17 +60,15 @@ std::string ResponseHandler::readCGIOutput(int pipefd[])
 }
 
 // Função para manipular solicitações de CGI (Common Gateway Interface)
-Response ResponseHandler::handleCGI(const Request &req,
-				    const std::string &cgiPath)
+void ResponseHandler::handleCGI(const std::string &cgiPath)
 {
-	Response response; // Objeto de resposta que será retornado
 	int pipefd[2];	   // descritores de arquivo para pipe
 
 	// Criar um pipe para comunicação entre processos
 	if (pipe(pipefd) == -1)
 	{
 		perror("pipe");
-		return generate500InternalServerError();
+		return generateErrorResponse(500);
 	}
 
 	pid_t pid = fork(); // Criar um novo processo
@@ -79,12 +77,12 @@ Response ResponseHandler::handleCGI(const Request &req,
 		perror("fork");
 		close(pipefd[0]);
 		close(pipefd[1]);
-		return generate500InternalServerError();
+		return generateErrorResponse(500);
 	}
 
 	std::vector<std::string> envVec;
 	char **envp = NULL;
-	setupEnviroment(req, envVec, envp);
+	setupEnviroment(envVec, envp);
 
 	// Código do processo filho
 	if (pid == 0)
@@ -98,13 +96,13 @@ Response ResponseHandler::handleCGI(const Request &req,
 		std::string responseBody = readCGIOutput(pipefd);
 		waitpid(pid, NULL, 0); // Aguardar o processo filho terminar
 
-		response.httpVersion = "HTTP/1.1";
-		response.statusCode = 200;
-		response.headers["Content-Type"] = getMimeType(".html");
-		response.body = responseBody;
+		_res.httpVersion = "HTTP/1.1";
+		_res.statusCode = 200;
+		_res.headers["Content-Type"] = getMimeType(".html");
+		_res.body = responseBody;
 	}
 	delete[] envp;
-	return response;
+	return;
 }
 
 bool ResponseHandler::isValidCGIScript(const std::string &cgiPath)
@@ -117,22 +115,6 @@ bool ResponseHandler::isValidCGIScript(const std::string &cgiPath)
 	}
 	// Check if file is regular and executable
 	return S_ISREG(s.st_mode) && (s.st_mode & S_IXUSR);
-}
-
-Response ResponseHandler::generate500InternalServerError()
-{
-	Response response;
-	response.httpVersion = "HTTP/1.1";
-	response.statusCode = 500;
-	response.body =
-	    "<html><body><h1>Internal Server Error</h1></body></html>\n";
-
-	std::stringstream ss;
-	ss << response.body.size();
-	response.headers["Content-Leghth"] = ss.str();
-	response.headers["Content_type"] = "text/html";
-
-	return response;
 }
 
 bool ResponseHandler::isCGIRequest(const std::string& uri){

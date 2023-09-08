@@ -42,6 +42,7 @@ struct ServerConfig
 	~ServerConfig();
 };
 
+void initLocation(LocationConfig &currentLocation);
 void printServerConfigurations(const std::vector<ServerConfig> &servers);
 std::vector<ServerConfig> parseConfiguration(const std::string &config);
 void processLocationDirective(const std::string &line, LocationConfig &currentLocation);

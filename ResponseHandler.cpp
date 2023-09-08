@@ -9,30 +9,31 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 	if(hasErrors()) {
 		return;
 	}
+	
+	if (_req.method == "GET") {
+		handlerGET();
+	} else if (_req.method == "DELETE") {
+		handlerDELETE();
+	} else if (_req.method == "POST") {
+		// handlerPOST();
+	} else {
 
-	if (_req.method == "DELETE"){
-		handlerDELETE(_req);
-		return;
 	}
-
 	if (isCGIRequest(_req.uri)){
-		_res = handleCGI(_req, getCgiPathFromUri(_req.uri));
+		handleCGI(getCgiPathFromUri(_req.uri));
 	}
 
 	// TODO: lidar com "index doesnotexist hello.html"
+	// ??? autoindex precisa ser veririfcado de acordo com método?
+
 	std::string content;
 	if (readFile(req.uri, content)){
 		_res.statusCode = 200;
 		_res.body = content;
-
 		_res.headers["Content-Type"] = "text/html";
 	} else {
-		_res.statusCode = 404;
-		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
-		_res.headers["Content-Type"] = "text/html";
-		// TODO: Procurar default error page, se existir
+		generateErrorResponse(404);
 	}
-	// ??? autoindex precisa ser veririfcado de acordo com método?
 }
 
 template<typename T>
@@ -48,40 +49,74 @@ static bool vectorContains(std::vector<T> vec, T target) {
 bool ResponseHandler::hasErrors() {
 	// check server_name
 	if (_conf.server_name != _req.host) { 
-		_res.statusCode = 400;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Invalid Host \n";
+		generateErrorResponse(400);
 	}
 
 	// check max_body_size
 	else if (_conf.client_max_body_size != -1 &&
 		 static_cast<int>(_req.body.size()) > _conf.client_max_body_size) {
-		_res.statusCode = 413;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Request body too large \n";
+		generateErrorResponse(413);
 	}
 
 	// check server allowed methods
 	else if (!vectorContains(_conf.allowed_method, _req.method)) {
-		_res.statusCode = 405;
-		_res.headers["Content-Type"] = "text/html";
-		_res.body = "Method not allowed \n";
+		generateErrorResponse(405);
 	}
 
 	// check location configs
 	else if (uriIsLocation()) {
 		if (!vectorContains(_conf.locations[_req.uri].accepted_methods, _req.method)) {
-			_res.statusCode = 405;
-			_res.headers["Content-Type"] = "text/html";
-			_res.body = "Method not allowed \n";
+			generateErrorResponse(405);
 		}
 	}
 
 	if (_res.statusCode != 0) {
-		// TODO: Procurar default error page, se existir
 		return true;
 	}
 	return false;
+}
+
+void ResponseHandler::generateErrorResponse (int code) {
+	_res.statusCode = code;
+
+	switch (code)
+	{
+	case 400:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Invalid Host \n";
+		break;
+	case 404:
+		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
+		_res.headers["Content-Type"] = "text/html";
+		break;
+	case 405:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Method not allowed \n";
+		break;
+	case 413:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "Request body too large \n";
+		break;
+	case 500:
+		_res.headers["Content-Type"] = "text/html";
+		_res.body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
+	default:
+		break;
+	}
+	getDefaultErrorPage();
+}
+
+void ResponseHandler::getDefaultErrorPage(void) {
+	std::stringstream ss;
+	ss << _res.statusCode;
+	// ??? lidar apenas com uma página de erro? Se lidar com mais do que uma, como deve ser a config de
+	// if (vectorContains(_conf.default_error_page, ss.str())) {
+	if (_conf.default_error_page[0] == ss.str()) {
+		std::string content;
+		if (readFile(_conf.root + _conf.default_error_page[1], content)){
+			_res.body = content;
+		}
+	}
 }
 
 std::string ResponseHandler::getResponse() {
@@ -178,4 +213,14 @@ bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 		}
 		return false;
 	}
+}
+
+std::string ResponseHandler::getPath(std::string uri){
+	std::string rootDir = _conf.root;
+	std::string path = rootDir + uri;
+
+	if (path[path.length() - 1] == '/'){
+		path.append("index.html");
+	}
+	return path;
 }

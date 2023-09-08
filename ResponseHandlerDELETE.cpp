@@ -27,20 +27,10 @@ static bool fileExists(const std::string& filePath){
 	return (stat(filePath.c_str(), &buffer) == 0);
 }
 
-std::string ResponseHandler::getPath(std::string uri){
-	std::string rootDir = _conf.root;
-	std::string path = rootDir + uri;
-
-	if (path[path.length() - 1] == '/'){
-		path.append("index.html");
-	}
-	return path;
-}
-
-void ResponseHandler::handlerDELETE(const Request &req)
+void ResponseHandler::handlerDELETE()
 {
 	// Obter o caminho absoluto do arquivo a ser excluído
-	std::string filePath = getPath(req.uri);
+	std::string filePath = getPath(_req.uri);
 	// Verificar se o arquivo realmente existe
 	if (fileExists(filePath))
 	{
@@ -56,16 +46,12 @@ void ResponseHandler::handlerDELETE(const Request &req)
 			// Se falhar, carregar a página de erro 500 (Erro Interno do Servidor)
 			std::string errorPath = getPath("/500.html");
 			readFromAFile(errorPath, _res.body);
-			_res.statusCode = 500;
-			_res.headers["Content-Type"] = "text/html";
-			_res.body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
+			generateErrorResponse(500);
 		}
 	} else {
 		// Se o arquivo não existir, carregar a página de erro 404 (Não Encontrado)
 			std::string errorPath = getPath("/404.html");
 			readFromAFile(errorPath, _res.body);
-			_res.statusCode = 404;
-			_res.headers["Content-Type"] = "text/html";
-			_res.body = "<html><body><h1>404 Not Found</h1></body></html>";
+			generateErrorResponse(404);
 	}
 }
