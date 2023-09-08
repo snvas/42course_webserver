@@ -31,6 +31,7 @@ private:
 	ServerConfig _conf;
 	Response _res;
 	StatusCode _statusCode;
+	LocationConfig *_locationConf;
 
 	// Manipulação de tipos de arquivos e MIME
 	void MimeType();
@@ -41,8 +42,8 @@ private:
 	bool readFile(const std::string &path, std::string &outContent);
 	bool isDirectory(const std::string &path);
 	std::string getPath(std::string uri);
-	bool uriIsLocation(void);
 	void getDefaultErrorPage(void);
+	void useLocationConfig(void);
 
 	// Manipulação de CGI
 	void handleCGI(const std::string &cgiPath);
@@ -55,6 +56,12 @@ private:
 	
 	// Gerar respostas de erro
 	void generateErrorResponse(int code);
+
+	bool hasRedirect(void);
+	void generate301RedirectResponse(std::string location);
+	void generateResponseFromFile (std::string file);
+	void generateDirectoryListining(std::string path);
+
 };
 
 

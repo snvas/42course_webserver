@@ -5,6 +5,7 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 
 	_res.httpVersion = "HTTP/1.1 ";
 	_res.statusCode = 0;
+	useLocationConfig();
 
 	if(hasErrors()) {
 		return;
@@ -16,24 +17,20 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 		handlerDELETE();
 	} else if (_req.method == "POST") {
 		// handlerPOST();
-	} else {
-
 	}
+	
 	if (isCGIRequest(_req.uri)){
 		handleCGI(getCgiPathFromUri(_req.uri));
 	}
 
-	// TODO: lidar com "index doesnotexist hello.html"
-	// ??? autoindex precisa ser veririfcado de acordo com método?
-
-	std::string content;
-	if (readFile(req.uri, content)){
-		_res.statusCode = 200;
-		_res.body = content;
-		_res.headers["Content-Type"] = "text/html";
-	} else {
-		generateErrorResponse(404);
-	}
+	// std::string content;
+	// if (readFile(req.uri, content)){
+	// 	_res.statusCode = 200;
+	// 	_res.body = content;
+	// 	_res.headers["Content-Type"] = "text/html";
+	// } else {
+	// 	generateErrorResponse(404);
+	// }
 }
 
 template<typename T>
@@ -44,6 +41,21 @@ static bool vectorContains(std::vector<T> vec, T target) {
 		}
 	}
 	return false;
+}
+
+void ResponseHandler::useLocationConfig() {
+	_locationConf = 0;
+    std::string path;
+
+	if (_req.uri == "/" || _req.uri == "") {
+		path = "/";
+	} else {
+		path = _req.uri.substr(0, _req.uri.find("/", 1));
+	}
+
+	if (_conf.locations.find(path) != _conf.locations.end()) {
+		_locationConf = &_conf.locations[path];
+	}
 }
 
 bool ResponseHandler::hasErrors() {
@@ -64,8 +76,8 @@ bool ResponseHandler::hasErrors() {
 	}
 
 	// check location configs
-	else if (uriIsLocation()) {
-		if (!vectorContains(_conf.locations[_req.uri].accepted_methods, _req.method)) {
+	else if (_locationConf != 0) {
+		if (!vectorContains(_locationConf->accepted_methods, _req.method)) {
 			generateErrorResponse(405);
 		}
 	}
@@ -82,23 +94,23 @@ void ResponseHandler::generateErrorResponse (int code) {
 	switch (code)
 	{
 	case 400:
-		_res.headers["Content-Type"] = "text/html";
+		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body = "Invalid Host \n";
 		break;
 	case 404:
 		_res.body = "<html><body><h1>404 Not Found</h1></body></html>\n";
-		_res.headers["Content-Type"] = "text/html";
+		_res.headers["Content-Type"] = getMimeType(".html");
 		break;
 	case 405:
-		_res.headers["Content-Type"] = "text/html";
+		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body = "Method not allowed \n";
 		break;
 	case 413:
-		_res.headers["Content-Type"] = "text/html";
+		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body = "Request body too large \n";
 		break;
 	case 500:
-		_res.headers["Content-Type"] = "text/html";
+		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
 	default:
 		break;
@@ -183,13 +195,6 @@ bool ResponseHandler::isDirectory(const std::string& path){
 		return S_ISDIR(s.st_mode);
 	}
 	return false;
-}
-
-bool ResponseHandler::uriIsLocation(void) {
-	if(_conf.locations.find(_req.uri) == _conf.locations.end()) {
-		return false;
-	}
-	return true;
 }
 
 bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
