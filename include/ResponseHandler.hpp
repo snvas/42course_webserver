@@ -20,7 +20,7 @@ public:
 	ResponseHandler(const Request req, const ServerConfig config);
 	std::string getResponse();
 	void handlerGET();
-	void handlerDELETE();
+	void handlerDELETE();	
 	
 private:
 	// Verificar erros nas solicitações e configurações
@@ -61,7 +61,10 @@ private:
 	void generate301RedirectResponse(std::string location);
 	void generateResponseFromFile (std::string file);
 	void generateDirectoryListining(std::string path);
-
+	
+	
+	void generateSucessResponse(int statusCode, const std::string &message);
+	void handlerPOST(void);
 };
 
 
