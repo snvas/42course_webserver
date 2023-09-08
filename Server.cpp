@@ -1,14 +1,20 @@
 #include "Server.hpp"
 
-Server::Server() {}
+Server::Server()
+{
+}
 
-Server::Server(const ServerConfig &config) : m_config(config){
+Server::Server(const ServerConfig &config) : m_config(config)
+{
 	initializeServer();
 }
 
-Server::~Server(){
+Server::~Server()
+{
 	close(m_listenSocket);
-	for (std::vector<struct pollfd>::iterator it = m_pollfds.begin(); it != m_pollfds.end(); ++it){
+	for (std::vector<struct pollfd>::iterator it = m_pollfds.begin();
+	     it != m_pollfds.end(); ++it)
+	{
 		close(it->fd);
 	}
 }
@@ -19,8 +25,7 @@ Server &Server::operator=(const Server &other)
 	{
 		// Limpa os recursos do objeto atual
 		close(m_listenSocket);
-		for (std::vector<struct pollfd>::iterator it =
-			 m_pollfds.begin();
+		for (std::vector<struct pollfd>::iterator it = m_pollfds.begin();
 		     it != m_pollfds.end(); ++it)
 		{
 			close(it->fd);
@@ -34,7 +39,7 @@ Server &Server::operator=(const Server &other)
 		// Para o vetor m_pollfds, é melhor fazer uma cópia profunda,
 		// para evitar problemas de propriedade compartilhada.
 		for (std::vector<struct pollfd>::const_iterator it =
-			 other.m_pollfds.begin();
+		         other.m_pollfds.begin();
 		     it != other.m_pollfds.end(); ++it)
 		{
 			struct pollfd pfd;
@@ -47,68 +52,84 @@ Server &Server::operator=(const Server &other)
 	return *this;
 }
 
-bool Server::initializeServer(){
+bool Server::initializeServer()
+{
 	std::cout << "Webserv running " << std::endl;
 
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_listenSocket < 0){
+	if (m_listenSocket < 0)
+	{
 		std::cerr << "Cannot create socket." << std::endl;
 		close(m_listenSocket);
 		return false;
 	}
 
-	if (!setSocketToNonBlocking(m_listenSocket)){
+	if (!setSocketToNonBlocking(m_listenSocket))
+	{
 		return false;
 	}
 
-	if (!bindSocketAndListen()){
+	if (!bindSocketAndListen())
+	{
 		return false;
 	}
 
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
-	std::cout << "Server started on port: " + m_config.server_name + ":" + numberToString(m_config.listen_port) << std::endl;
+	std::cout << "Server started on port: " + m_config.server_name + ":" +
+	                 numberToString(m_config.listen_port)
+	          << std::endl;
 
 	return true;
 }
 
-bool Server::setSocketToNonBlocking(int socket){
+bool Server::setSocketToNonBlocking(int socket)
+{
 	int flags = fcntl(socket, F_GETFL, 0);
-	if (flags == -1){
+	if (flags == -1)
+	{
 		std::cerr << "Cannot get socket flags." << std::endl;
 		return false;
 	}
 
 	flags |= O_NONBLOCK;
-	if (fcntl(socket, F_SETFL, flags) == -1){
+	if (fcntl(socket, F_SETFL, flags) == -1)
+	{
 		std::cerr << "Cannot set socket to non-blocking." << std::endl;
 		return false;
 	}
 	return true;
 }
 
-bool Server::bindSocketAndListen(){
+bool Server::bindSocketAndListen()
+{
 	sockaddr_in serverAddr;
 	std::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = INADDR_ANY;
 	serverAddr.sin_port = htons(m_config.listen_port);
 
-	if (bind(m_listenSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) < 0){
+	if (bind(m_listenSocket, (struct sockaddr *) &serverAddr,
+	         sizeof(serverAddr)) < 0)
+	{
 		std::cerr << "Cannot bind to port." << std::endl;
 		return false;
 	}
 
-	if (listen(m_listenSocket, 10) < 0){
+	if (listen(m_listenSocket, 10) < 0)
+	{
 		std::cerr << "Cannot listen to socket." << std::endl;
 		return false;
 	}
 	return true;
 }
 
-void Server::run(){
-	while (true){
-		if (poll(&m_pollfds[0], m_pollfds.size(), -1) < 0){
+void Server::run()
+{
+	while (true)
+	{
+		if (poll(&m_pollfds[0], m_pollfds.size(), -1) < 0)
+		{
 			std::cerr << "Error on poll." << std::endl;
 			break;
 		}
@@ -163,33 +184,44 @@ void Server::processClientRequest(size_t i)
 
 		std::cout << "Method: " << request.method << std::endl;
 		std::cout << "URI: " << request.uri << std::endl;
-		if (!request.query.empty()){
+		if (!request.query.empty())
+		{
 			std::cout << "Query: " << request.query << std::endl;
 		}
 		std::cout << "HTTP Version: " << request.httpVersion << std::endl;
 		std::cout << "Host: " << request.host << std::endl;
-		if (!request.port.empty()){
+		if (!request.port.empty())
+		{
 			std::cout << "Port: " << request.port << std::endl;
 		}
-		if (!request.content_lenght.empty()){
-			std::cout << "Content-Lenght: " << request.content_lenght << std::endl;
+		if (!request.content_lenght.empty())
+		{
+			std::cout << "Content-Lenght: " << request.content_lenght
+			          << std::endl;
 		}
-		if (!request.content_type.empty()){
+		if (!request.content_type.empty())
+		{
 			std::cout << "Content-Type: " << request.content_type << std::endl;
 		}
-		if (!request.user_agent.empty()){
+		if (!request.user_agent.empty())
+		{
 			std::cout << "User-Agent: " << request.user_agent << std::endl;
 		}
-		if (!request.authorization.empty()){
-			std::cout << "Authorization: " << request.authorization << std::endl;
+		if (!request.authorization.empty())
+		{
+			std::cout << "Authorization: " << request.authorization
+			          << std::endl;
 		}
-		if (!request.accept.empty()){
+		if (!request.accept.empty())
+		{
 			std::cout << "Accept: " << request.accept << std::endl;
 		}
-		if (!request.cgi_path.empty()){
+		if (!request.cgi_path.empty())
+		{
 			std::cout << "CGI Path: " << request.cgi_path << std::endl;
 		}
-		if (!request.body.empty()){
+		if (!request.body.empty())
+		{
 			std::cout << "Body:\n " << request.body << std::endl;
 		}
 
@@ -201,13 +233,15 @@ void Server::processClientRequest(size_t i)
 	}
 }
 
-std::string Server::numberToString(int number){
+std::string Server::numberToString(int number)
+{
 	std::ostringstream ss;
-	ss <<number;
+	ss << number;
 	return ss.str();
 }
 
-void Server::stop(void){
+void Server::stop(void)
+{
 	std::cout << "Stopping Webserver" << std::endl;
 	this->m_pollfds.clear();
 	std::cout << "Good Bye!!" << std::endl;

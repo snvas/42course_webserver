@@ -3,10 +3,11 @@
 
 Server webServer;
 
-void sigint_handler(int sig){
+void sigint_handler(int sig)
+{
 	std::cout << '\n';
 	std::cerr << "Rceived signal " << (sig + 128) << std::endl;
-	//webServer.stop();
+	// webServer.stop();
 	exit(0);
 }
 
@@ -20,12 +21,13 @@ int main(int argc, char **argv)
 	sigIntHandler.sa_handler = sigint_handler;
 	sigemptyset(&sigIntHandler.sa_mask);
 	sigIntHandler.sa_flags = 0;
-	sigaction( SIGINT, &sigIntHandler, NULL);
+	sigaction(SIGINT, &sigIntHandler, NULL);
 
 	std::vector<ServerConfig> configServers = parseConfiguration(configContent);
 	printServerConfigurations(configServers);
 
-	if (!configServers.empty()){
+	if (!configServers.empty())
+	{
 		Server webServer(configServers[0]);
 		webServer.run();
 	}

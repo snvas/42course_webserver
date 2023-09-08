@@ -1,6 +1,7 @@
 #include "StatusCode.hpp"
 
-StatusCode::StatusCode(){
+StatusCode::StatusCode()
+{
 	_statusCode[200] = "200 OK";
 	_statusCode[201] = "201 Created";
 	_statusCode[202] = "202 Accepted";
@@ -22,21 +23,29 @@ StatusCode::StatusCode(){
 	_statusCode[505] = "505 HTTP Version Not Supported";
 }
 
-StatusCode::~StatusCode(){}
+StatusCode::~StatusCode()
+{
+}
 
-StatusCode::StatusCode(const StatusCode &other) : _statusCode(other._statusCode) { }
+StatusCode::StatusCode(const StatusCode &other) : _statusCode(other._statusCode)
+{
+}
 
-StatusCode& StatusCode::operator=(const StatusCode& other){
-	if (this != &other){
+StatusCode &StatusCode::operator=(const StatusCode &other)
+{
+	if (this != &other)
+	{
 		_statusCode = other._statusCode;
 	}
 	return *this;
 }
 
-std::string StatusCode::getStatusCode(int code) {
+std::string StatusCode::getStatusCode(int code)
+{
 	return _statusCode[code];
 }
 
-void StatusCode::setStatusCode(int code, const std::string& message){
+void StatusCode::setStatusCode(int code, const std::string &message)
+{
 	_statusCode[code] = message;
 }
