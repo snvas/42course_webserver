@@ -2,7 +2,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-std::string sanitizeUri(const std::string &uri)
+static std::string sanitizeUri(const std::string &uri)
 {
 	if (uri.size() > 1 && uri.at(uri.size() - 1) == '/')
 	{

@@ -20,8 +20,9 @@ public:
 	ResponseHandler(const Request req, const ServerConfig config);
 	std::string getResponse();
 	void handlerGET();
-	void handlerDELETE();
-
+	void handlerDELETE();	
+	void handlerPOST(void);
+ 
 private:
 	// Verificar erros nas solicitações e configurações
 	bool hasErrors();
@@ -57,11 +58,12 @@ private:
 
 	// Gerar respostas de erro
 	void generateErrorResponse(int code);
-
-	bool hasRedirect(void);
 	void generate301RedirectResponse(std::string location);
 	void generateResponseFromFile(std::string file);
 	void generateDirectoryListining(std::string path);
+	void generateSucessResponse(int statusCode, const std::string &message);
+  
+	bool hasRedirect(void);
 };
 
 #endif

@@ -17,6 +17,7 @@ SRCS = 	main.cpp \
 		StatusCode.cpp \
 		ResponseHandlerGET.cpp \
 		ResponseHandlerDELETE.cpp \
+		ResponseHandlerPOST.cpp \
 		ResponseHandlerCGI.cpp
 
 OBJS = $(SRCS:.cpp=.o)

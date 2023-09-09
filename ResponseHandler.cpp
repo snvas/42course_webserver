@@ -19,10 +19,11 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 	else if (_req.method == "DELETE")
 	{
 		handlerDELETE();
+
 	}
 	else if (_req.method == "POST")
 	{
-		// handlerPOST();
+		handlerPOST();
 	}
 
 	if (isCGIRequest(_req.uri))
