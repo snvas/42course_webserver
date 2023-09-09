@@ -1,25 +1,33 @@
 #include "ResponseHandler.hpp"
 
-ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
-	_req(req), _conf(config) {
-
+ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
+    : _req(req), _conf(config)
+{
 	_res.httpVersion = "HTTP/1.1 ";
 	_res.statusCode = 0;
 	useLocationConfig();
 
-	if(hasErrors()) {
+	if (hasErrors())
+	{
 		return;
 	}
-	
-	if (_req.method == "GET") {
+
+	if (_req.method == "GET")
+	{
 		handlerGET();
-	} else if (_req.method == "DELETE") {
+	}
+	else if (_req.method == "DELETE")
+	{
 		handlerDELETE();
-	} else if (_req.method == "POST") {
+
+	}
+	else if (_req.method == "POST")
+	{
 		handlerPOST();
 	}
-	
-	if (isCGIRequest(_req.uri)){
+
+	if (isCGIRequest(_req.uri))
+	{
 		handleCGI(getCgiPathFromUri(_req.uri));
 	}
 
@@ -33,62 +41,77 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config):
 	// }
 }
 
-template<typename T>
-static bool vectorContains(std::vector<T> vec, T target) {
-	for (size_t i = 0; i < vec.size(); i++) {
-		if(vec[i] == target) {
+template <typename T> static bool vectorContains(std::vector<T> vec, T target)
+{
+	for (size_t i = 0; i < vec.size(); i++)
+	{
+		if (vec[i] == target)
+		{
 			return true;
 		}
 	}
 	return false;
 }
 
-void ResponseHandler::useLocationConfig() {
+void ResponseHandler::useLocationConfig()
+{
 	_locationConf = 0;
-    std::string path;
+	std::string path;
 
-	if (_req.uri == "/" || _req.uri == "") {
+	if (_req.uri == "/" || _req.uri == "")
+	{
 		path = "/";
-	} else {
+	}
+	else
+	{
 		path = _req.uri.substr(0, _req.uri.find("/", 1));
 	}
 
-	if (_conf.locations.find(path) != _conf.locations.end()) {
+	if (_conf.locations.find(path) != _conf.locations.end())
+	{
 		_locationConf = &_conf.locations[path];
 	}
 }
 
-bool ResponseHandler::hasErrors() {
+bool ResponseHandler::hasErrors()
+{
 	// check server_name
-	if (_conf.server_name != _req.host) { 
+	if (_conf.server_name != _req.host)
+	{
 		generateErrorResponse(400);
 	}
 
 	// check max_body_size
 	else if (_conf.client_max_body_size != -1 &&
-		 static_cast<int>(_req.body.size()) > _conf.client_max_body_size) {
+	         static_cast<int>(_req.body.size()) > _conf.client_max_body_size)
+	{
 		generateErrorResponse(413);
 	}
 
 	// check server allowed methods
-	else if (!vectorContains(_conf.allowed_method, _req.method)) {
+	else if (!vectorContains(_conf.allowed_method, _req.method))
+	{
 		generateErrorResponse(405);
 	}
 
 	// check location configs
-	else if (_locationConf != 0) {
-		if (!vectorContains(_locationConf->accepted_methods, _req.method)) {
+	else if (_locationConf != 0)
+	{
+		if (!vectorContains(_locationConf->accepted_methods, _req.method))
+		{
 			generateErrorResponse(405);
 		}
 	}
 
-	if (_res.statusCode != 0) {
+	if (_res.statusCode != 0)
+	{
 		return true;
 	}
 	return false;
 }
 
-void ResponseHandler::generateErrorResponse (int code) {
+void ResponseHandler::generateErrorResponse(int code)
+{
 	_res.statusCode = code;
 
 	switch (code)
@@ -111,41 +134,47 @@ void ResponseHandler::generateErrorResponse (int code) {
 		break;
 	case 500:
 		_res.headers["Content-Type"] = getMimeType(".html");
-		_res.body = "<html><body><h1>500 Internal Server Error</h1></body></html>";
+		_res.body = "<html><body><h1>500 Internal Server "
+		            "Error</h1></body></html>";
 	default:
 		break;
 	}
 	getDefaultErrorPage();
 }
 
-void ResponseHandler::getDefaultErrorPage(void) {
+void ResponseHandler::getDefaultErrorPage(void)
+{
 	std::stringstream ss;
 	ss << _res.statusCode;
-	// ??? lidar apenas com uma página de erro? Se lidar com mais do que uma, como deve ser a config de
-	// if (vectorContains(_conf.default_error_page, ss.str())) {
-	if (_conf.default_error_page[0] == ss.str()) {
+	// ??? lidar apenas com uma página de erro? Se lidar com mais do que uma,
+	// como deve ser a config de if (vectorContains(_conf.default_error_page,
+	// ss.str())) {
+	if (_conf.default_error_page[0] == ss.str())
+	{
 		std::string content;
-		if (readFile(_conf.root + _conf.default_error_page[1], content)){
+		if (readFile(_conf.root + _conf.default_error_page[1], content))
+		{
 			_res.body = content;
 		}
 	}
 }
 
-std::string ResponseHandler::getResponse() {
-    std::string response;
+std::string ResponseHandler::getResponse()
+{
+	std::string response;
 	response.append(_res.httpVersion);
-    response.append(_statusCode.getStatusCode(_res.statusCode));
-    response.append("\r\n");
-    response.append("Content-Type: ");
-    response.append(_res.headers["Content-Type"]);
-    response.append("\r\n");
-    response.append("Content-Length: ");
+	response.append(_statusCode.getStatusCode(_res.statusCode));
+	response.append("\r\n");
+	response.append("Content-Type: ");
+	response.append(_res.headers["Content-Type"]);
+	response.append("\r\n");
+	response.append("Content-Length: ");
 	std::stringstream ss;
 	ss << _res.body.size();
-    response.append(ss.str());
-    response.append("\r\n");
-    response.append("Connection: keep-alive");
-    response.append("\r\n\r\n");
+	response.append(ss.str());
+	response.append("\r\n");
+	response.append("Connection: keep-alive");
+	response.append("\r\n\r\n");
 
 	response.append(_res.body);
 
@@ -154,13 +183,12 @@ std::string ResponseHandler::getResponse() {
 
 void ResponseHandler::MimeType()
 {
-
 	_mimeTypes[".css"] = "text/css";
 	_mimeTypes[".csv"] = "text/csv";
 	_mimeTypes[".doc"] = "application/msword";
-	_mimeTypes[".docx"] =
-	    "application/"
-	    "vnd.openxmlformats-officedocument.wordprocessingml.document";
+	_mimeTypes[".docx"] = "application/"
+	                      "vnd.openxmlformats-officedocument.wordprocessingml."
+	                      "document";
 	_mimeTypes[".epub"] = "application/epub+zip";
 	_mimeTypes[".gz"] = "application/gzip";
 	_mimeTypes[".gif"] = "image/gif";
@@ -189,9 +217,11 @@ std::string ResponseHandler::getMimeType(const std::string &fileExtension)
 	return _mimeTypes[fileExtension];
 }
 
-bool ResponseHandler::isDirectory(const std::string& path){
+bool ResponseHandler::isDirectory(const std::string &path)
+{
 	struct stat s;
-	if (stat(path.c_str(), &s) == 0){
+	if (stat(path.c_str(), &s) == 0)
+	{
 		return S_ISDIR(s.st_mode);
 	}
 	return false;
@@ -199,7 +229,6 @@ bool ResponseHandler::isDirectory(const std::string& path){
 
 bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 {
-
 	if (isDirectory(path))
 	{
 		std::cout << path << "é um diretório!" << std::endl;
@@ -207,24 +236,24 @@ bool ResponseHandler::readFile(const std::string &path, std::string &outContent)
 	}
 	else
 	{
-		std::ifstream file(path.c_str(),
-				   std::ios::in | std::ios::binary);
+		std::ifstream file(path.c_str(), std::ios::in | std::ios::binary);
 		if (file)
 		{
-			outContent.assign(
-			    (std::istreambuf_iterator<char>(file)),
-			    std::istreambuf_iterator<char>());
+			outContent.assign((std::istreambuf_iterator<char>(file)),
+			                  std::istreambuf_iterator<char>());
 			return true;
 		}
 		return false;
 	}
 }
 
-std::string ResponseHandler::getPath(std::string uri){
+std::string ResponseHandler::getPath(std::string uri)
+{
 	std::string rootDir = _conf.root;
 	std::string path = rootDir + uri;
 
-	if (path[path.length() - 1] == '/'){
+	if (path[path.length() - 1] == '/')
+	{
 		path.append("index.html");
 	}
 	return path;

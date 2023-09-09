@@ -1,6 +1,7 @@
 #include "ResponseHandler.hpp"
 
-// Função auxiliar para ler o conteúdo de um arquivo e armazená-lo em uma string.
+// Função auxiliar para ler o conteúdo de um arquivo e armazená-lo em uma
+// string.
 static void readFromAFile(std::string path, std::string &body)
 {
 	// Abre o arquivo localizado no caminho especificado
@@ -21,7 +22,8 @@ static void readFromAFile(std::string path, std::string &body)
 }
 
 // Função auxiliar para verificar se um arquivo existe
-static bool fileExists(const std::string& filePath){
+static bool fileExists(const std::string &filePath)
+{
 	struct stat buffer;
 	// A função stat() retorna 0 se o arquivo existir
 	return (stat(filePath.c_str(), &buffer) == 0);
@@ -37,21 +39,26 @@ void ResponseHandler::handlerDELETE()
 		// Tenta remover o arquivo e verifica se a operação foi bem-sucedida
 		if (std::remove(filePath.c_str()) == 0)
 		{
-			// Se bem-sucedido, definir o código de status como 204 (Sem Conteúdo)
+			// Se bem-sucedido, definir o código de status como 204 (Sem
+			// Conteúdo)
 			_res.statusCode = 204;
 			_res.headers["Content-Type"] = "text/html";
 		}
 		else
 		{
-			// Se falhar, carregar a página de erro 500 (Erro Interno do Servidor)
+			// Se falhar, carregar a página de erro 500 (Erro Interno do
+			// Servidor)
 			std::string errorPath = getPath("/500.html");
 			readFromAFile(errorPath, _res.body);
 			generateErrorResponse(500);
 		}
-	} else {
-		// Se o arquivo não existir, carregar a página de erro 404 (Não Encontrado)
-			std::string errorPath = getPath("/404.html");
-			readFromAFile(errorPath, _res.body);
-			generateErrorResponse(404);
+	}
+	else
+	{
+		// Se o arquivo não existir, carregar a página de erro 404 (Não
+		// Encontrado)
+		std::string errorPath = getPath("/404.html");
+		readFromAFile(errorPath, _res.body);
+		generateErrorResponse(404);
 	}
 }

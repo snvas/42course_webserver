@@ -3,16 +3,17 @@
 
 #include "CommonLibs.hpp"
 
-class StatusCode {
-      public:
+class StatusCode
+{
+public:
 	StatusCode();
 	~StatusCode();
 	std::string getStatusCode(int code);
-	void setStatusCode(int code, const std::string& message);
-	StatusCode& operator=(const StatusCode& other);
+	void setStatusCode(int code, const std::string &message);
+	StatusCode &operator=(const StatusCode &other);
 	StatusCode(const StatusCode &other);
 
-      private:
+private:
 	std::map<int, std::string> _statusCode;
 };
 

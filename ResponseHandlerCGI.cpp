@@ -1,7 +1,7 @@
 #include "ResponseHandler.hpp"
 
 void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
-		     char **&envp)
+                                      char **&envp)
 {
 	envVec.push_back("AUTH_TYPE=" + _req.authorization);
 	envVec.push_back("REDIRECT_STATUS=200");
@@ -32,14 +32,16 @@ void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
 	envp[envVec.size()] = NULL;
 }
 
-void ResponseHandler::executeCGIInChild(const std::string &cgiPath, char **envp, int pipefd[])
+void ResponseHandler::executeCGIInChild(const std::string &cgiPath, char **envp,
+                                        int pipefd[])
 {
-	close(pipefd[0]); // Fechar a extremidade de leitura do pipe
+	close(pipefd[0]);               // Fechar a extremidade de leitura do pipe
 	dup2(pipefd[1], STDOUT_FILENO); // Redirecionar stdout para o pipe
 	close(pipefd[1]); // Fechar a extremidade de escrita original do pipe
-	char* const argv[] = {const_cast<char*>(cgiPath.c_str()), NULL};
+	char *const argv[] = {const_cast<char *>(cgiPath.c_str()), NULL};
 	// Executar o script CGI
-	if (execve(cgiPath.c_str(), argv, envp) == -1){
+	if (execve(cgiPath.c_str(), argv, envp) == -1)
+	{
 		perror("execve");
 		exit(EXIT_FAILURE); // Encerrar o processo filho com status de falha
 	}
@@ -62,7 +64,7 @@ std::string ResponseHandler::readCGIOutput(int pipefd[])
 // Função para manipular solicitações de CGI (Common Gateway Interface)
 void ResponseHandler::handleCGI(const std::string &cgiPath)
 {
-	int pipefd[2];	   // descritores de arquivo para pipe
+	int pipefd[2]; // descritores de arquivo para pipe
 
 	// Criar um pipe para comunicação entre processos
 	if (pipe(pipefd) == -1)
@@ -117,12 +119,14 @@ bool ResponseHandler::isValidCGIScript(const std::string &cgiPath)
 	return S_ISREG(s.st_mode) && (s.st_mode & S_IXUSR);
 }
 
-bool ResponseHandler::isCGIRequest(const std::string& uri){
+bool ResponseHandler::isCGIRequest(const std::string &uri)
+{
 	std::vector<std::string> cgiPaths = _conf.cgi_extensions;
 
 	return std::find(cgiPaths.begin(), cgiPaths.end(), uri) != cgiPaths.end();
 }
 
-std::string ResponseHandler::getCgiPathFromUri(const std::string& uri){
+std::string ResponseHandler::getCgiPathFromUri(const std::string &uri)
+{
 	return "cgi-bin/" + uri;
 }
