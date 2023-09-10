@@ -8,7 +8,7 @@ Request::Request()
 	uri = "";
 	httpVersion = "";
 	body = "";
-	content_lenght = "";
+	content_length = "";
 	content_type = "";
 	user_agent = "";
 	authorization = "";
@@ -56,8 +56,8 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 			{
 				std::string headername = line.substr(0, delimiterPos);
 				std::string headerValue = line.substr(
-				    delimiterPos + 2, line.length() - delimiterPos - 2 -
-				                          1); // -1 para remover o '\r'
+				    delimiterPos + 2, line.length() - delimiterPos - 2 - 1);
+				// -1 para remover o '\r'
 
 				if (headername == "Host")
 				{
@@ -73,9 +73,9 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 						req.port = "80";
 					}
 				}
-				else if (headername == "Content-Lenght")
+				else if (headername == "Content-Length")
 				{
-					req.content_lenght = headerValue;
+					req.content_length = headerValue;
 				}
 				else if (headername == "Content-type")
 				{

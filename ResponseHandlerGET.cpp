@@ -48,40 +48,32 @@ void ResponseHandler::handlerGET(void)
 
 	std::string sanitizedUri = sanitizeUri(_req.uri);
 
-	if (!_locationConf)
-	{
-		return;
-	}
 	// correcting segmentation fault at this line
-	if (!_locationConf->default_file.empty())
+	if (_locationConf != 0 && !_locationConf->default_file.empty() &&
+	    (isDirectory(getPath(sanitizedUri)) || sanitizedUri == "/"))
 	{
 		std::string path = getPath(sanitizedUri);
-		if (isDirectory(path))
+		if (isFile(getPath(sanitizedUri + "/" + _locationConf->default_file)))
 		{
-			if (isFile(
-			        getPath(sanitizedUri + "/" + _locationConf->default_file)))
-			{
-				generateResponseFromFile(
-				    getPath(sanitizedUri + "/" + _locationConf->default_file));
-			}
-			else
-			{
-				generateErrorResponse(404);
-			}
+			generateResponseFromFile(
+			    getPath(sanitizedUri + "/" + _locationConf->default_file));
+		}
+		else
+		{
+			generateErrorResponse(404);
 		}
 		return;
 	}
 
 	if (isDirectory(_conf.root + _req.uri))
 	{
-		if (_req.uri == "/" && isFile(getPath(_req.uri)))
+		if (isFile(getPath(_req.uri)))
 		{
 			generateResponseFromFile(getPath(_req.uri));
 		}
 		else if (_locationConf->directory_listing == "on")
 		{
 			generateDirectoryListining(getPath(_req.uri));
-			return;
 		}
 		else
 		{

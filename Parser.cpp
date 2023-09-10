@@ -167,7 +167,7 @@ void processLocationDirective(const std::string &line,
 		lineStream >> autoindex;
 		currentLocation.directory_listing = autoindex;
 	}
-	else if (directive == "default_file")
+	else if (directive == "index")
 	{
 		std::string index_file;
 		lineStream >> index_file;

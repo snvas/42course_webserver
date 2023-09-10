@@ -9,7 +9,7 @@ void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
 	envVec.push_back("SCRIPT_NAME=" + _req.cgi_path);
 	envVec.push_back("SCRIPT_FILENAME" + _req.cgi_path);
 	envVec.push_back("REQUEST_METHOD" + _req.method);
-	envVec.push_back("CONTENT_LENGTH=" + _req.content_lenght);
+	envVec.push_back("CONTENT_LENGTH=" + _req.content_length);
 	envVec.push_back("CONTENT_TYPE=" + _req.content_type);
 	envVec.push_back("PATH_INFO=" + _req.cgi_path);
 	envVec.push_back("PATH_TRANSLATED=" + _req.cgi_path);
