@@ -19,7 +19,6 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 	else if (_req.method == "DELETE")
 	{
 		handlerDELETE();
-
 	}
 	else if (_req.method == "POST")
 	{
@@ -30,15 +29,6 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 	{
 		handleCGI(getCgiPathFromUri(_req.uri));
 	}
-
-	// std::string content;
-	// if (readFile(req.uri, content)){
-	// 	_res.statusCode = 200;
-	// 	_res.body = content;
-	// 	_res.headers["Content-Type"] = "text/html";
-	// } else {
-	// 	generateErrorResponse(404);
-	// }
 }
 
 template <typename T> static bool vectorContains(std::vector<T> vec, T target)
@@ -65,6 +55,11 @@ void ResponseHandler::useLocationConfig()
 	else
 	{
 		path = _req.uri.substr(0, _req.uri.find("/", 1));
+		if (_conf.locations.find(path) == _conf.locations.end() &&
+		    path[0] == '/')
+		{
+			path = "/";
+		}
 	}
 
 	if (_conf.locations.find(path) != _conf.locations.end())

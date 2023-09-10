@@ -56,8 +56,8 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 			{
 				std::string headername = line.substr(0, delimiterPos);
 				std::string headerValue = line.substr(
-				    delimiterPos + 2, line.length() - delimiterPos - 2 -
-				                          1); // -1 para remover o '\r'
+				    delimiterPos + 2, line.length() - delimiterPos - 2 - 1);
+				// -1 para remover o '\r'
 
 				if (headername == "Host")
 				{
