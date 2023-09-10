@@ -33,6 +33,7 @@ private:
 	Response _res;
 	StatusCode _statusCode;
 	LocationConfig *_locationConf;
+	std::string _binary;
 
 	// Manipulação de tipos de arquivos e MIME
 	void MimeType();
@@ -55,6 +56,7 @@ private:
 	std::string readCGIOutput(int pipefd[]);
 	bool isCGIRequest(const std::string &uri);
 	std::string getCgiPathFromUri(const std::string &uri);
+	std::string resolveBinaryPath(void);
 
 	// Gerar respostas de erro
 	void generateErrorResponse(int code);
