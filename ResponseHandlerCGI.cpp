@@ -1,14 +1,42 @@
 #include "ResponseHandler.hpp"
 
+std::vector<std::string> split(const std::string &s, char delimiter){
+	std::vector<std::string> tokens;
+	std::string token;
+	std::istringstream tokenStream(s);
+	while (std::getline(tokenStream, token, delimiter)){
+		tokens.push_back(token);
+	}
+	return tokens;
+}
+
+std::string ResponseHandler::resolveBinaryPath(void){
+	std::string resolve;
+	std::vector<std::string> splitPath;
+	char* path = std::getenv("PATH");
+
+	if (!path)
+		return "";
+	
+	splitPath = split(std::string(path), ':');
+	for (std::vector<std::string>::iterator it = splitPath.begin(); it != splitPath.end(); ++it){
+		resolve = (*it) + "/" + _binary;
+		if (access(resolve.c_str(), X_OK) == 0)
+			return resolve;
+	}
+	return "";
+
+}
+
 void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
                                       char **&envp)
 {
 	envVec.push_back("AUTH_TYPE=" + _req.authorization);
 	envVec.push_back("REDIRECT_STATUS=200");
-	envVec.push_back("GATEWAY_INTEFACE=CGI/1.1");
+	envVec.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	envVec.push_back("SCRIPT_NAME=" + _req.cgi_path);
-	envVec.push_back("SCRIPT_FILENAME" + _req.cgi_path);
-	envVec.push_back("REQUEST_METHOD" + _req.method);
+	envVec.push_back("SCRIPT_FILENAME=" + _req.cgi_path);
+	envVec.push_back("REQUEST_METHOD=" + _req.method);
 	envVec.push_back("CONTENT_LENGTH=" + _req.content_length);
 	envVec.push_back("CONTENT_TYPE=" + _req.content_type);
 	envVec.push_back("PATH_INFO=" + _req.cgi_path);
@@ -64,6 +92,18 @@ std::string ResponseHandler::readCGIOutput(int pipefd[])
 // Função para manipular solicitações de CGI (Common Gateway Interface)
 void ResponseHandler::handleCGI(const std::string &cgiPath)
 {
+	if (!isValidCGIScript(cgiPath)){
+		return generateErrorResponse(403);
+	}
+	if (_binary.find_first_not_of('/') == std::string::npos){
+		std::string resolvedPath = resolveBinaryPath();
+		if (resolvedPath.empty()){
+			std::cerr << "Binário não encontrado" << std::endl;
+			return;
+		}
+		_binary = resolvedPath;
+	}
+
 	int pipefd[2]; // descritores de arquivo para pipe
 
 	// Criar um pipe para comunicação entre processos
