@@ -194,9 +194,9 @@ void Server::processClientRequest(size_t i)
 		{
 			std::cout << "Port: " << request.port << std::endl;
 		}
-		if (!request.content_lenght.empty())
+		if (!request.content_length.empty())
 		{
-			std::cout << "Content-Lenght: " << request.content_lenght
+			std::cout << "Content-Lenght: " << request.content_length
 			          << std::endl;
 		}
 		if (!request.content_type.empty())
@@ -222,7 +222,7 @@ void Server::processClientRequest(size_t i)
 		}
 		if (!request.body.empty())
 		{
-			std::cout << "Body:\n " << request.body << std::endl;
+			std::cout << "Body:\n" << request.body << std::endl;
 		}
 
 		ResponseHandler handler(request, m_config);
