@@ -92,7 +92,8 @@ bool ResponseHandler::hasErrors()
 	// check location configs
 	else if (_locationConf != 0)
 	{
-		if (!vectorContains(_locationConf->accepted_methods, _req.method))
+		if (!_locationConf->accepted_methods.empty() &&
+		    !vectorContains(_locationConf->accepted_methods, _req.method))
 		{
 			generateErrorResponse(405);
 		}
