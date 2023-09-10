@@ -77,7 +77,7 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 				{
 					req.content_length = headerValue;
 				}
-				else if (headername == "Content-type")
+				else if (headername == "Content-Type")
 				{
 					req.content_type = headerValue;
 				}

@@ -132,7 +132,7 @@ void ResponseHandler::handlerPOST(void)
 	std::string sanitizedPath = sanitizeUri(_req.uri);
 	std::string path = getPath(sanitizedPath);
 
-	if (isMultiPartFormData(_res.headers["Content_type"]))
+	if (isMultiPartFormData(_res.headers["Content-Type"]))
 	{
 		std::string boundary = getBoundary(_req.headers["Content-Type"]);
 		if (boundary.empty())
