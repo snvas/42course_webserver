@@ -3,11 +3,13 @@
 
 static int isFile(std::string path)
 {
-	std::ifstream indexFile(path.c_str());
-
-	if (indexFile.is_open())
+	struct stat s;
+	if (stat(path.c_str(), &s) == 0)
 	{
-		return true;
+		if (s.st_mode & S_IFREG)
+		{
+			return true;
+		}
 	}
 	return false;
 }
@@ -109,10 +111,10 @@ void ResponseHandler::handlerPOST(void)
 	ss << _req.body.size();
 	std::string bodySizeStr = ss.str();
 
-	if (_req.headers["Content-Length"] != bodySizeStr)
+	if (_req.content_length != bodySizeStr)
 	{
 		std::cerr << "Content-Length mismatch" << std::endl;
-		std::cout << "Header Content-Length: " << _req.headers["Content-Length"]
+		std::cout << "Header Content-Length: " << _req.content_length
 		          << std::endl;
 		std::cout << "Actual Body Size: " << _req.body.size() << std::endl;
 		generateErrorResponse(400);
@@ -182,7 +184,7 @@ void ResponseHandler::handlerPOST(void)
 			}
 			else if (isDirectory(path))
 			{
-				std::string newFilePath = path + "newfile.txt";
+				std::string newFilePath = path + "/newfile.txt";
 				std::ofstream file(newFilePath.c_str());
 
 				if (file.is_open())
@@ -214,7 +216,6 @@ void ResponseHandler::generateSucessResponse(int statusCode,
                                              const std::string &message)
 {
 	_res.statusCode = statusCode;
-	_res.httpVersion = "HTTP/1.1";
 	_res.headers["Content-Type"] = getMimeType(".html");
 	std::ostringstream oss;
 	oss << "<html><head><title>" << message << "</title></head><body><h1>"
