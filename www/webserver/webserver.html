@@ -72,7 +72,7 @@
 								<a href="cgi.html"
 									class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50">CGI</a>
 							</div>
-
+							
 						</div>
 					</div>
 				</div>
@@ -106,36 +106,80 @@
 							<span class="sr-only">Back</span>
 						</a>
 						<div class="text-center">
-							<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-2xl">O que é CGI</h1>
+							<h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-2xl">O que é um Webserver?</h1>
 						</div>
 						<div class="mt-12">
 
 							<p>
-								CGI (Common Gateway Interface) é um padrão que permite que
-								servidores web interajam com programas externos para produzir
-								páginas web dinâmicas. Ele é amplamente usado para processar dados
-								de formulários e criar conteúdo dinâmico.
+								Um <strong>webserver</strong> é um sistema de software que armazena,
+								processa e serve páginas da web para usuários ou dispositivos.
+								Quando um usuário solicita uma página web através de um navegador
+								(como Chrome, Firefox ou Safari), o navegador envia uma solicitação
+								para o webserver, que processa essa solicitação e envia os dados da
+								página de volta ao navegador. O navegador, então, interpreta esses
+								dados e exibe a página para o usuário.
 							</p>
 							<div class="mt-6">
+								<label class="block text-sm font-bold text-gray-700">Funções principais de um Webserver</label>
+								<ul>
+									<li>
+										Armazenar conteúdo da web, como páginas HTML, imagens, e arquivos
+										CSS/JS.
+									</li>
+									<li>Processar solicitações de usuários para esses conteúdos.</li>
+									<li>
+										Responder às solicitações enviando o conteúdo apropriado de volta
+										ao navegador do usuário.
+									</li>
+								</ul>
+							</div>
+							<div class="mt-6">
+								<label class="block text-sm font-bold text-gray-700">Exemplos de Webservers populares</label>
+								<ol>
+									<li>Apache HTTP Server</li>
+									<li>NGINX</li>
+									<li>Microsoft Internet Information Services (IIS)</li>
+									<li>LiteSpeed</li>
+								</ol>
+
 								<p>
-									Entender a CGI é crucial para desenvolver aplicações web dinâmicas e
-									garantir que os servidores web funcionem corretamente com programas
-									externos.
+									<br />
+									Se você estiver interessado em aprender mais sobre o funcionamento
+									interno dos servidores web ou como configurá-los, há muitos recursos
+									e tutoriais disponíveis online para aprofundar seu conhecimento.
 								</p>
-								<p>&nbsp;</p>
-								<p><a href="https://learn.microsoft.com/pt-br/iis/configuration/system.webserver/cgi"
-										class="text-sm font-semibold leading-6 text-indigo-600"><span aria-hidden="true">→</span> CGI <cgi></a></p>
-								<p><a href="https://httpd.apache.org/docs/2.4/howto/cgi.html" class="text-sm font-semibold leading-6 text-indigo-600"><span
-											aria-hidden="true">→</span> Apache Tutorial: Dynamic Content with CGI</a></p>
+								<p><a href="https://trungams.github.io/2020-08-23-a-simple-http-server-from-scratch/"
+										class="text-sm font-semibold leading-6 text-indigo-600"><span aria-hidden="true">→</span> A simple HTTP server from
+										scratch </a></p>
+								<p><a href="https://beej.us/guide/bgnet/html/" class="text-sm font-semibold leading-6 text-indigo-600"><span
+											aria-hidden="true">→</span> Beej's Guide to Network Programming </a></p>
+								<p><a href="https://medium.com/from-the-scratch/http-server-what-do-you-need-to-know-to-build-a-simple-http-server-from-scratch-d1ef8945e4fa"
+										class="text-sm font-semibold leading-6 text-indigo-600"><span aria-hidden="true">→</span> HTTP Server: Everything you
+										need to know to Build a simple HTTP server from scratch </a></p>
 
 							</div>
 							<div class="mt-10 flex items-center justify-center gap-x-6">
+								<a href="autoindex.html"
+									class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Autoindex</a>
 								<a href="index.html" class="text-sm font-semibold leading-6 text-gray-900">Voltar <span aria-hidden="true">→</span></a>
 							</div>
 						</div>
 					</div>
 				</div>
-				
+				<div class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
+					<svg class="relative left-[calc(50%+3rem)] h-[21.1875rem] max-w-none -translate-x-1/2 sm:left-[calc(50%+36rem)] sm:h-[42.375rem]"
+						viewBox="0 0 1155 678">
+						<path fill="url(#ecb5b0c9-546c-4772-8c71-4d3f06d544bc)" fill-opacity=".3"
+							d="M317.219 518.975L203.852 678 0 438.341l317.219 80.634 204.172-286.402c1.307 132.337 45.083 346.658 209.733 145.248C936.936 126.058 882.053-94.234 1031.02 41.331c119.18 108.451 130.68 295.337 121.53 375.223L855 299l21.173 362.054-558.954-142.079z" />
+						<defs>
+							<linearGradient id="ecb5b0c9-546c-4772-8c71-4d3f06d544bc" x1="1155.49" x2="-78.208" y1=".177" y2="474.645"
+								gradientUnits="userSpaceOnUse">
+								<stop stop-color="#9089FC" />
+								<stop offset="1" stop-color="#FF80B5" />
+							</linearGradient>
+						</defs>
+					</svg>
+				</div>
 		</div>
 		</main>
 	</div>
