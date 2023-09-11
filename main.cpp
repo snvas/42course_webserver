@@ -31,6 +31,5 @@ int main(int argc, char **argv)
 		Server webServer(configServers);
 		webServer.run();
 	}
-
 	return 0;
 }
