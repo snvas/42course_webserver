@@ -27,6 +27,12 @@ struct LocationConfig
 	}
 };
 
+struct ErrorPages
+{
+	std::string code;
+	std::string file;
+};
+
 // Estrutura para configuração de um servidor.
 struct ServerConfig
 {
@@ -35,7 +41,7 @@ struct ServerConfig
 	int client_max_body_size;
 	std::vector<std::string> index;
 	std::vector<std::string> allowed_method;
-	std::vector<std::string> default_error_page;
+	std::vector<ErrorPages> default_error_page;
 	std::string directory_listing;
 	std::string root;
 	std::vector<std::string> cgi_extensions;
@@ -45,6 +51,7 @@ struct ServerConfig
 };
 
 void initLocation(LocationConfig &currentLocation);
+void initServer(ServerConfig &currentServer);
 void printServerConfigurations(const std::vector<ServerConfig> &servers);
 std::vector<ServerConfig> parseConfiguration(const std::string &config);
 void processLocationDirective(const std::string &line,

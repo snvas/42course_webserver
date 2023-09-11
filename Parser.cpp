@@ -113,7 +113,11 @@ void processServerDirective(const std::string &line,
 	}
 	else if (directive == "error_page")
 	{
-		currentServer.default_error_page = extractMultipleWords(lineStream);
+		std::vector<std::string> vec = extractMultipleWords(lineStream);
+		ErrorPages err;
+		err.code = vec[0];
+		err.file = vec[1];
+		currentServer.default_error_page.push_back(err);
 	}
 	else if (directive == "cgi")
 	{
@@ -213,8 +217,8 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 			{ // Se estivermos em um bloco de servidor, adicionamos
 			  // o servidor à lista de servidores
 				servers.push_back(currentServer);
-				currentServer.locations.clear();
 				currentState = START;
+				initServer(currentServer);
 			}
 			continue;
 		}
@@ -263,6 +267,20 @@ std::vector<ServerConfig> parseConfiguration(const std::string &config)
 	return servers;
 }
 
+void initServer(ServerConfig &currentServer)
+{
+	currentServer.listen_port = 0;
+	currentServer.server_name.clear();
+	currentServer.client_max_body_size = 0;
+	currentServer.index.clear();
+	currentServer.allowed_method.clear();
+	currentServer.default_error_page.clear();
+	currentServer.directory_listing.clear();
+	currentServer.root.clear();
+	currentServer.cgi_extensions.clear();
+	currentServer.locations.clear();
+}
+
 void initLocation(LocationConfig &currentLocation)
 {
 	currentLocation.accepted_methods.clear();
@@ -297,6 +315,16 @@ void printServerConfigurations(const std::vector<ServerConfig> &servers)
 			std::cout << "\tautoindex " << serverIt->directory_listing << ";"
 			          << std::endl;
 
+		if (!serverIt->default_error_page.empty())
+		{
+			for (std::vector<ErrorPages>::const_iterator it =
+			         serverIt->default_error_page.begin();
+			     it != serverIt->default_error_page.end(); it++)
+			{
+				std::cout << "\terror_page " << it->code << " " << it->file
+				          << ";" << std::endl;
+			}
+		}
 		if (!serverIt->index.empty())
 		{
 			std::cout << "\tindex ";

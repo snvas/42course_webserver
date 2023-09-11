@@ -3,7 +3,7 @@ import pytest
 import requests
 import json
 
-port = "3011"
+port = "3012"
 server1_url = "http://localhost:" + port
 
 def test_get_root():
@@ -40,14 +40,30 @@ def test_directory_listing_not_allowed():
     res = requests.get(server1_url + "/notlistfile")
     assert res.status_code == 404
 
+def test_configured_404_page():
+    res = requests.get(server1_url + "/not_found")
+    expected = ""
+    for line in open("www/404.html"):
+        expected += line
+
+    assert res.text == expected
+
+def test_configured_405_page():
+    res = requests.delete(server1_url)
+    expected = ""
+    for line in open("www/405.html"):
+        expected += line
+        
+    assert res.text == expected
+
 # TODO ??
 # def test_post_method():
 #     url = server1_url + "/teste2"
 #     body = json.dumps({u'body': u'Sounds great! Ill get right on it!'})
-#     # headers = {
-#     #     'Content-Type': 'text/plain',
+#     headers = {
+#         'Content-Type': 'text/plain',
 #     #     'Content-Length': '14'
-#     # }
+#     }
 
-#     res = requests.post(url, data = body)  
+#     res = requests.post(url, data=body, headers=headers)  
 #     assert res.status_code == 201
