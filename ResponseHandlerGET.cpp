@@ -13,15 +13,16 @@ static std::string sanitizeUri(const std::string &uri)
 
 static int isFile(std::string path)
 {
-	std::ifstream indexFile(path.c_str());
-
-	if (indexFile.is_open())
+	struct stat s;
+	if (stat(path.c_str(), &s) == 0)
 	{
-		return true;
+		if (s.st_mode & S_IFREG)
+		{
+			return true;
+		}
 	}
 	return false;
 }
-
 static int __attribute__((unused)) isDirectory(std::string path)
 {
 	DIR *dir = opendir(path.c_str());
@@ -138,7 +139,7 @@ void ResponseHandler::generateDirectoryListining(std::string path)
 	if ((dir = opendir(path.c_str())) != NULL)
 	{
 		_res.statusCode = 200;
-		_res.httpVersion = "HTTP/1.1";
+		_res.httpVersion = "HTTP/1.1 ";
 		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body.append("<html><head><title>Index of " + path +
 		                 "</title></head>"

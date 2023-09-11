@@ -3,3 +3,4 @@ Serverepoll.cpp
 Serverepoll.hpp
 *.o
 webserv
+*__pycache__*
