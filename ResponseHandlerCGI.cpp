@@ -31,6 +31,7 @@ std::string ResponseHandler::resolveBinaryPath(void){
 void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
                                       char **&envp)
 {
+	envVec.push_back("HTTP_HOST=" + _req.host);
 	envVec.push_back("AUTH_TYPE=" + _req.authorization);
 	envVec.push_back("REDIRECT_STATUS=200");
 	envVec.push_back("GATEWAY_INTERFACE=CGI/1.1");
