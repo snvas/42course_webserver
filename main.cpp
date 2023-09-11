@@ -28,9 +28,8 @@ int main(int argc, char **argv)
 
 	if (!configServers.empty())
 	{
-		Server webServer(configServers[0]);
+		Server webServer(configServers);
 		webServer.run();
 	}
-
 	return 0;
 }

@@ -12,11 +12,9 @@ class Server
 {
 public:
 	Server();
-	Server(const ServerConfig &config);
 	~Server();
-	Server &operator=(const Server &other);
-
-	bool initializeServer();
+	Server(const std::vector<ServerConfig> &configs);
+	bool initializeServer(const ServerConfig &config);
 	void run();
 	void processClientRequest(size_t i);
 	void acceptNewConnection();
@@ -28,9 +26,11 @@ private:
 	std::vector<pollfd> m_pollfds;
 
 	bool setSocketToNonBlocking(int socket);
-	void handleIncomingRequest();
-	bool bindSocketAndListen();
+	void handleIncomingRequest(size_t i);
+	bool bindSocketAndListen(const ServerConfig &config);
 	std::string numberToString(int number);
+	Server(const Server &other);
+	Server &operator=(const Server &other);
 };
 
 #endif
