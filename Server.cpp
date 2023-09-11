@@ -4,10 +4,16 @@ Server::Server()
 {
 }
 
-Server::Server(const ServerConfig &config) : m_config(config)
+Server::Server(const std::vector<ServerConfig> &config) : m_config(config)
 {
-	initializeServer();
+	std::cout << "Webserv running " << std::endl;
+
+	for (int i = 0; i < (int) m_config.size(); i++)
+	{
+		initializeServer(i);
+	}
 }
+
 
 Server::~Server()
 {
@@ -52,15 +58,12 @@ Server &Server::operator=(const Server &other)
 	return *this;
 }
 
-bool Server::initializeServer()
+bool Server::initializeServer(int index)
 {
-	std::cout << "Webserv running " << std::endl;
-
 	m_listenSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (m_listenSocket < 0)
 	{
 		std::cerr << "Cannot create socket." << std::endl;
-		close(m_listenSocket);
 		return false;
 	}
 
@@ -69,15 +72,15 @@ bool Server::initializeServer()
 		return false;
 	}
 
-	if (!bindSocketAndListen())
+	if (!bindSocketAndListen(index))
 	{
 		return false;
 	}
 
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
-	std::cout << "Server started on port: " + m_config.server_name + ":" +
-	                 numberToString(m_config.listen_port)
+	std::cout << "Server started on port: " + m_config[index].server_name +
+	                 ":" + numberToString(m_config[index].listen_port)
 	          << std::endl;
 
 	return true;
@@ -85,15 +88,23 @@ bool Server::initializeServer()
 
 bool Server::setSocketToNonBlocking(int socket)
 {
-	int flags = fcntl(socket, F_GETFL, 0);
-	if (flags == -1)
+	int on = 1;
+	int rc = setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+
+	if (rc < 0)
 	{
-		std::cerr << "Cannot get socket flags." << std::endl;
+		std::cerr << "bind() failed" << std::endl;
+		close(socket);
 		return false;
 	}
+	// int flags = fcntl(socket, F_GETFL, 0);
+	// if (flags == -1)
+	// {
+	// 	std::cerr << "Cannot get socket flags." << std::endl;
+	// 	return false;
+	// }
 
-	flags |= O_NONBLOCK;
-	if (fcntl(socket, F_SETFL, flags) == -1)
+	if (fcntl(socket, F_SETFL, O_NONBLOCK) == -1)
 	{
 		std::cerr << "Cannot set socket to non-blocking." << std::endl;
 		return false;
@@ -101,13 +112,13 @@ bool Server::setSocketToNonBlocking(int socket)
 	return true;
 }
 
-bool Server::bindSocketAndListen()
+bool Server::bindSocketAndListen(int index)
 {
 	sockaddr_in serverAddr;
 	std::memset(&serverAddr, 0, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = INADDR_ANY;
-	serverAddr.sin_port = htons(m_config.listen_port);
+	serverAddr.sin_port = htons(m_config[index].listen_port);
 
 	if (bind(m_listenSocket, (struct sockaddr *) &serverAddr,
 	         sizeof(serverAddr)) < 0)
@@ -116,7 +127,7 @@ bool Server::bindSocketAndListen()
 		return false;
 	}
 
-	if (listen(m_listenSocket, 10) < 0)
+	if (listen(m_listenSocket, SOMAXCONN) < 0)
 	{
 		std::cerr << "Cannot listen to socket." << std::endl;
 		return false;
@@ -128,56 +139,66 @@ void Server::run()
 {
 	while (true)
 	{
-		if (poll(&m_pollfds[0], m_pollfds.size(), -1) < 0)
+		if (poll((struct pollfd *) &(*m_pollfds.begin()), m_pollfds.size(),
+		         -1) < 0)
 		{
 			std::cerr << "Error on poll." << std::endl;
 			break;
 		}
-		handleIncomingRequest();
+		for (size_t i = 0; i < m_pollfds.size(); ++i){
+			if (m_pollfds[i].revents & (POLLERR | POLLHUP)){
+				close(m_pollfds[i].fd);
+				m_pollfds.erase(m_pollfds.begin() + i);
+				--i;
+				continue;
+			}
+			handleIncomingRequest(i);
+		}
 	}
 }
 
-void Server::handleIncomingRequest()
+void Server::handleIncomingRequest(size_t index)
 {
 	for (size_t i = 0; i < m_pollfds.size(); ++i)
 	{
+		int server_socket = m_pollfds[i].fd;
 		if (m_pollfds[i].revents & POLLIN)
 		{
-			if (m_pollfds[i].fd == m_listenSocket)
+			struct sockaddr_in cli_addr;
+			// store the size of the client adress
+			socklen_t clilen = sizeof(cli_addr);
+
+			int clientSocket =
+			    accept(server_socket, (struct sockaddr *) &cli_addr, &clilen);
+			if (clientSocket < 0)
 			{
-				acceptNewConnection();
-			}
-			else
+				std::cerr << "Error accepting connection" << std::endl;
+			} else
 			{
-				processClientRequest(i);
+				processClientRequest(clientSocket, i);
 			}
 		}
 	}
 }
 
-void Server::acceptNewConnection()
-{
-	int clientSocket = accept(m_listenSocket, NULL, NULL);
-	if (clientSocket > 0)
-	{
-		setSocketToNonBlocking(clientSocket);
-		struct pollfd pfd = {clientSocket, POLLIN, 0};
-		m_pollfds.push_back(pfd);
-	}
-}
+// void Server::acceptNewConnection()
+// {
 
-void Server::processClientRequest(size_t i)
+// }
+
+void Server::processClientRequest(int clientSocket, size_t i)
 {
+	std::cout << "Processing request for client at descriptor: " << m_pollfds[i].fd << std::endl;
 	char buffer[1024];
-	ssize_t bytesRead = recv(m_pollfds[i].fd, buffer, sizeof(buffer), 0);
+	ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 	if (bytesRead <= 0)
 	{
-		close(m_pollfds[i].fd);
+		close(clientSocket);
 		m_pollfds.erase(m_pollfds.begin() + i);
 		--i;
+		return;
 	}
-	else
-	{
+	std::cout << "Received " << bytesRead << " bytes from client at descriptor: " << m_pollfds[i].fd << std::endl;
 		std::string requestString(buffer, bytesRead);
 		RequestParser parser;
 		Request request = parser.parsingRequest(requestString);
@@ -225,11 +246,13 @@ void Server::processClientRequest(size_t i)
 			std::cout << "Body:\n" << request.body << std::endl;
 		}
 
-		ResponseHandler handler(request, m_config);
+		ResponseHandler handler(request, m_config[i]);
 		std::string response = handler.getResponse();
 
 		std::cout << "\n\nresponse: \n" << response << std::endl;
-		send(m_pollfds[i].fd, response.c_str(), response.length(), 0);
+		send(clientSocket, response.c_str(), response.length(), 0);
+		// TODO: verificar erros do send
+		close(clientSocket);
 	}
 }
 
