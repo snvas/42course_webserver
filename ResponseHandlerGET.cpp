@@ -72,7 +72,7 @@ void ResponseHandler::handlerGET(void)
 		{
 			generateResponseFromFile(getPath(_req.uri));
 		}
-		else if (_locationConf->directory_listing == "on")
+		else if (_locationConf != 0 && _locationConf->directory_listing == "on")
 		{
 			generateDirectoryListining(getPath(_req.uri));
 		}
