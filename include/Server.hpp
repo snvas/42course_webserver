@@ -32,7 +32,6 @@ private:
 	bool bindSocketAndListen(int index);
 	std::string numberToString(int number);
 	Server(const Server &other);
-	Server &operator=(const Server &other);
 };
 
 #endif

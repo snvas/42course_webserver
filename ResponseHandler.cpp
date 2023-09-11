@@ -13,7 +13,11 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 		return;
 	}
 
-	if (_req.method == "GET")
+	if (isCGIRequest(_req.uri))
+	{
+		handleCGI(getCgiPathFromUri(_req.uri));
+	}
+	else if (_req.method == "GET")
 	{
 		handlerGET();
 	}
@@ -24,11 +28,6 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 	else if (_req.method == "POST")
 	{
 		handlerPOST();
-	}
-
-	if (isCGIRequest(_req.uri))
-	{
-		handleCGI(getCgiPathFromUri(_req.uri));
 	}
 }
 
