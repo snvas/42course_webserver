@@ -3,6 +3,7 @@
 ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
     : _req(req), _conf(config)
 {
+	MimeType();
 	_res.httpVersion = "HTTP/1.1 ";
 	_res.statusCode = 0;
 	useLocationConfig();
@@ -142,15 +143,19 @@ void ResponseHandler::getDefaultErrorPage(void)
 {
 	std::stringstream ss;
 	ss << _res.statusCode;
-	// ??? lidar apenas com uma página de erro? Se lidar com mais do que uma,
-	// como deve ser a config de if (vectorContains(_conf.default_error_page,
-	// ss.str())) {
-	if (_conf.default_error_page[0] == ss.str())
+
+	for (std::vector<ErrorPages>::iterator it =
+	         _conf.default_error_page.begin();
+	     it != _conf.default_error_page.end(); it++)
 	{
 		std::string content;
-		if (readFile(_conf.root + _conf.default_error_page[1], content))
+		if (it->code == ss.str())
 		{
-			_res.body = content;
+			if (readFile(_conf.root + it->file, content))
+			{
+				_res.body = content;
+			}
+			break;
 		}
 	}
 }

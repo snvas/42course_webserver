@@ -43,7 +43,11 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 	{
 		if (readingBody)
 		{
-			bodyStream << line << "\n";
+			bodyStream << line;
+			if (!requestStream.eof())
+			{
+				bodyStream << "\n";
+			}
 		}
 		else if (line == "\r" || line.empty())
 		{
