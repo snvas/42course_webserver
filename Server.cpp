@@ -98,14 +98,17 @@ bool Server::setSocketToNonBlocking(int socket)
 		close(socket);
 		return false;
 	}
-	// int flags = fcntl(socket, F_GETFL, 0);
-	// if (flags == -1)
-	// {
-	// 	std::cerr << "Cannot get socket flags." << std::endl;
-	// 	return false;
-	// }
 
-	if (fcntl(socket, F_SETFL, O_NONBLOCK) == -1)
+	int flags = fcntl(socket, F_GETFL, 0);
+	if (flags == -1)
+	{
+		std::cerr << "Cannot get socket flags." << std::endl;
+		return false;
+	}
+
+	flags |= O_NONBLOCK;
+
+	if (fcntl(socket, F_SETFL, flags) == -1)
 	{
 		std::cerr << "Cannot set socket to non-blocking." << std::endl;
 		return false;
@@ -176,19 +179,19 @@ void Server::acceptNewConnection(int serverindex)
 	struct sockaddr_in cli_addr;
 	// store the size of the client adress
 	socklen_t clilen = sizeof(cli_addr);
-	int clientSocket = accept(m_serverSocks[serverindex],
-	                          (struct sockaddr *) &cli_addr, &clilen);
-	if (clientSocket < 0)
+	int clientfd = accept(m_serverSocks[serverindex],
+	                      (struct sockaddr *) &cli_addr, &clilen);
+	if (clientfd < 0)
 	{
 		std::cerr << "Error accepting connection" << std::endl;
 	}
 	else
 	{
-		setSocketToNonBlocking(clientSocket);
-		struct pollfd pfd = {clientSocket, POLLIN, 0};
+		setSocketToNonBlocking(clientfd);
+		struct pollfd pfd = {clientfd, POLLIN, 0};
 		m_pollfds.push_back(pfd);
 		ClientSocket client;
-		client.clienfd = clientSocket;
+		client.clienfd = clientfd;
 		client.serverIndex = serverindex;
 		m_clients.push_back(client);
 	}
@@ -206,11 +209,20 @@ void Server::processClientRequest(int clientfd)
 		if (m_clients[i].clienfd == clientfd) index = i;
 	}
 
-	// sleep(1);
 	ssize_t bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
 	while (bytesRead > 0)
 	{
 		requestString.append(buffer, bytesRead);
+
+		size_t found = requestString.find("Content-Length: ");
+		if (found != std::string::npos)
+		{
+			std::string temp = requestString.substr(found);
+			found = temp.find(" ");
+			temp = temp.substr(found + 1);
+			int v = atoi(temp.c_str());
+			if (v != 0) sleep(1);
+		}
 		bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
 	}
 
@@ -262,12 +274,12 @@ void Server::processClientRequest(int clientfd)
 			std::cout << "Body:\n" << request.body << std::endl;
 		}
 
-		ResponseHandler handler(request, m_config[m_clients[index].serverIndex]);
+		ResponseHandler handler(request,
+		                        m_config[m_clients[index].serverIndex]);
 		std::string response = handler.getResponse();
 
 		std::cout << "\n\nresponse: \n" << response << std::endl;
-		send(clientfd, response.c_str(),
-		     response.length(), 0);
+		send(clientfd, response.c_str(), response.length(), 0);
 		// TODO: verificar erros do send
 		close(clientfd);
 		// TODO: remover do pollfds também
