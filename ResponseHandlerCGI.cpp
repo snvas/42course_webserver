@@ -162,9 +162,19 @@ bool ResponseHandler::isValidCGIScript(const std::string &cgiPath)
 
 bool ResponseHandler::isCGIRequest(const std::string &uri)
 {
-	std::vector<std::string> cgiPaths = _conf.cgi_extensions;
+	// Verificar se a URI tem pelo menos um ponto (indicando possível
+	// extensão)
+	size_t lastDot = uri.find_last_of(".");
+	if (lastDot == std::string::npos)
+		return false;
 
-	return std::find(cgiPaths.begin(), cgiPaths.end(), uri) != cgiPaths.end();
+	// Extrair a extensão da URI
+	std::string extension = uri.substr(lastDot);
+
+	// Verificar se a extensão está na lista de extensões CGI
+	return std::find(_conf.cgi_extensions.begin(),
+			 _conf.cgi_extensions.end(),
+			 extension) != _conf.cgi_extensions.end();
 }
 
 std::string ResponseHandler::getCgiPathFromUri(const std::string &uri)

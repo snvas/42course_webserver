@@ -13,12 +13,9 @@ ResponseHandler::ResponseHandler(const Request req, const ServerConfig config)
 		return;
 	}
 
-	handleCGI("." + _req.uri);
-	return;
-
 	if (isCGIRequest(_req.uri))
 	{
-		handleCGI(getCgiPathFromUri(_req.uri));
+		handleCGI(_conf.root + _req.uri);
 	}
 	else if (_req.method == "GET")
 	{
