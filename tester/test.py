@@ -3,7 +3,7 @@ import pytest
 import requests
 import json
 
-port = "3012"
+port = "3010"
 server1_url = "http://localhost:" + port
 
 def test_get_root():
@@ -56,14 +56,9 @@ def test_configured_405_page():
         
     assert res.text == expected
 
-# TODO ??
-# def test_post_method():
-#     url = server1_url + "/teste2"
-#     body = json.dumps({u'body': u'Sounds great! Ill get right on it!'})
-#     headers = {
-#         'Content-Type': 'text/plain',
-#     #     'Content-Length': '14'
-#     }
+def test_post_method():
+    url = server1_url + "/teste2"
+    body = json.dumps({u'body': u'Sounds great! Ill get right on it!'})
 
-#     res = requests.post(url, data=body, headers=headers)  
-#     assert res.status_code == 201
+    res = requests.post(url, data=body)
+    assert res.status_code == 201

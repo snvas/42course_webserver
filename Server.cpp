@@ -63,6 +63,7 @@ bool Server::initializeServer(int index)
 	if (m_listenSocket < 0)
 	{
 		std::cerr << "Cannot create socket." << std::endl;
+		close(m_listenSocket);
 		return false;
 	}
 
@@ -78,6 +79,7 @@ bool Server::initializeServer(int index)
 
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
+	m_serverSocks.push_back(m_listenSocket);
 	std::cout << "Server started on port: " + m_config[index].server_name +
 	                 ":" + numberToString(m_config[index].listen_port)
 	          << std::endl;
@@ -144,17 +146,7 @@ void Server::run()
 			std::cerr << "Error on poll." << std::endl;
 			break;
 		}
-		for (size_t i = 0; i < m_pollfds.size(); ++i)
-		{
-			if (m_pollfds[i].revents & (POLLERR | POLLHUP))
-			{
-				close(m_pollfds[i].fd);
-				m_pollfds.erase(m_pollfds.begin() + i);
-				--i;
-				continue;
-			}
-			handleIncomingRequest();
-		}
+		handleIncomingRequest();
 	}
 }
 
@@ -162,51 +154,68 @@ void Server::handleIncomingRequest()
 {
 	for (size_t i = 0; i < m_pollfds.size(); ++i)
 	{
-		int server_socket = m_pollfds[i].fd;
+		int serverfd = m_pollfds[i].fd;
 		if (m_pollfds[i].revents & POLLIN)
 		{
-			struct sockaddr_in cli_addr;
-			// store the size of the client adress
-			socklen_t clilen = sizeof(cli_addr);
-
-			int clientSocket =
-			    accept(server_socket, (struct sockaddr *) &cli_addr, &clilen);
-			if (clientSocket < 0)
+			std::vector<int>::iterator it =
+			    std::find(m_serverSocks.begin(), m_serverSocks.end(), serverfd);
+			if (it != m_serverSocks.end())
 			{
-				std::cerr << "Error accepting connection" << std::endl;
+				acceptNewConnection(it - m_serverSocks.begin());
 			}
 			else
 			{
-				processClientRequest(clientSocket, i);
+				processClientRequest(m_pollfds[i].fd);
 			}
 		}
 	}
 }
 
-// void Server::acceptNewConnection()
-// {
-
-// }
-
-void Server::processClientRequest(int clientSocket, size_t i)
+void Server::acceptNewConnection(int serverindex)
 {
-	std::cout << "Processing request for client at descriptor: "
-	          << m_pollfds[i].fd << std::endl;
-	char buffer[1024];
-	ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-	if (bytesRead <= 0)
+	struct sockaddr_in cli_addr;
+	// store the size of the client adress
+	socklen_t clilen = sizeof(cli_addr);
+	int clientSocket = accept(m_serverSocks[serverindex],
+	                          (struct sockaddr *) &cli_addr, &clilen);
+	if (clientSocket < 0)
 	{
-		close(clientSocket);
-		m_pollfds.erase(m_pollfds.begin() + i);
-		--i;
-		return;
+		std::cerr << "Error accepting connection" << std::endl;
 	}
 	else
 	{
-		std::cout << "Received " << bytesRead
-		          << " bytes from client at descriptor: " << m_pollfds[i].fd
-		          << std::endl;
-		std::string requestString(buffer, bytesRead);
+		setSocketToNonBlocking(clientSocket);
+		struct pollfd pfd = {clientSocket, POLLIN, 0};
+		m_pollfds.push_back(pfd);
+		ClientSocket client;
+		client.clienfd = clientSocket;
+		client.serverIndex = serverindex;
+		m_clients.push_back(client);
+	}
+}
+
+void Server::processClientRequest(int clientfd)
+{
+	char buffer[1024];
+	memset(buffer, 0, 1024);
+	std::string requestString = "";
+
+	int index;
+	for (size_t i = 0; i < m_clients.size(); i++)
+	{
+		if (m_clients[i].clienfd == clientfd) index = i;
+	}
+
+	// sleep(1);
+	ssize_t bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
+	while (bytesRead > 0)
+	{
+		requestString.append(buffer, bytesRead);
+		bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
+	}
+
+	if (!requestString.empty())
+	{
 		RequestParser parser;
 		Request request = parser.parsingRequest(requestString);
 
@@ -253,13 +262,15 @@ void Server::processClientRequest(int clientSocket, size_t i)
 			std::cout << "Body:\n" << request.body << std::endl;
 		}
 
-		ResponseHandler handler(request, m_config[i]);
+		ResponseHandler handler(request, m_config[m_clients[index].serverIndex]);
 		std::string response = handler.getResponse();
 
 		std::cout << "\n\nresponse: \n" << response << std::endl;
-		send(clientSocket, response.c_str(), response.length(), 0);
+		send(clientfd, response.c_str(),
+		     response.length(), 0);
 		// TODO: verificar erros do send
-		close(clientSocket);
+		close(clientfd);
+		// TODO: remover do pollfds também
 	}
 }
 
