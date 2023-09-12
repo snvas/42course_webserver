@@ -63,6 +63,7 @@ bool Server::initializeServer(int index)
 	if (m_listenSocket < 0)
 	{
 		std::cerr << "Cannot create socket." << std::endl;
+		close(m_listenSocket);
 		return false;
 	}
 
@@ -144,17 +145,7 @@ void Server::run()
 			std::cerr << "Error on poll." << std::endl;
 			break;
 		}
-		for (size_t i = 0; i < m_pollfds.size(); ++i)
-		{
-			if (m_pollfds[i].revents & (POLLERR | POLLHUP))
-			{
-				close(m_pollfds[i].fd);
-				m_pollfds.erase(m_pollfds.begin() + i);
-				--i;
-				continue;
-			}
-			handleIncomingRequest();
-		}
+		handleIncomingRequest();
 	}
 }
 
@@ -190,22 +181,17 @@ void Server::handleIncomingRequest()
 
 void Server::processClientRequest(int clientSocket, size_t i)
 {
-	std::cout << "Processing request for client at descriptor: "
-	          << m_pollfds[i].fd << std::endl;
 	char buffer[1024];
+	// TODO: corrigir lógica
 	ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
 	if (bytesRead <= 0)
 	{
 		close(clientSocket);
 		m_pollfds.erase(m_pollfds.begin() + i);
 		--i;
-		return;
 	}
 	else
 	{
-		std::cout << "Received " << bytesRead
-		          << " bytes from client at descriptor: " << m_pollfds[i].fd
-		          << std::endl;
 		std::string requestString(buffer, bytesRead);
 		RequestParser parser;
 		Request request = parser.parsingRequest(requestString);
