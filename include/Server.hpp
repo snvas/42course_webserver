@@ -8,6 +8,12 @@
 #include "Server.hpp"
 #include "StatusCode.hpp"
 
+struct ClientSocket
+{
+	int clienfd;
+	int serverIndex;
+};
+
 class Server
 {
 public:
@@ -18,14 +24,16 @@ public:
 
 	bool initializeServer(int index);
 	void run();
-	void processClientRequest(int clientSocket, size_t i);
-	void acceptNewConnection();
+	void processClientRequest(int clientfd);
+	void acceptNewConnection(int serverSocket);
 	void stop();
 
 private:
 	std::vector<ServerConfig> m_config;
 	int m_listenSocket;
 	std::vector<pollfd> m_pollfds;
+	std::vector<int> m_serverSocks;
+	std::vector<ClientSocket> m_clients;
 
 	bool setSocketToNonBlocking(int socket);
 	void handleIncomingRequest();
