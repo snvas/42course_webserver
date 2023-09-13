@@ -22,7 +22,7 @@ fileitem = form['image']
 if fileitem.filename:
     # strip leading path from file name to avoid directory traversal attacks
     filename = os.path.basename(fileitem.filename)
-    upload_dir = 'cgi-bin/uploads/'  # assegure-se que este diretório existe e tem permissões de escrita
+    upload_dir = './www/cgi-bin/uploads/'  # assegure-se que este diretório existe e tem permissões de escrita
     
     # Limpando o nome do arquivo
     clean_filename = ''.join(e for e in filename if e.isalnum() or e in ['.', '-']).rstrip()
@@ -37,7 +37,7 @@ if fileitem.filename:
 
     # Recuperando dados do arquivo e salvando
     file_data = fileitem.file.read()
-    with open(file_path, 'wb') as f:
+    with open(file_path, 'xb') as f:
         f.write(file_data)
 
     print("Arquivo '" + filename + "' foi enviado e salvo como '" + os.path.basename(file_path) + "'!")

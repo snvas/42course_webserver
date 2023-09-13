@@ -113,6 +113,17 @@ void ResponseHandler::generate301RedirectResponse(std::string location)
 	            location + "');</script></head></html>";
 }
 
+
+std::string readAllFile(std::istream &in)
+{
+    std::string ret;
+    char buffer[4096];
+    while (in.read(buffer, sizeof(buffer)))
+        ret.append(buffer, sizeof(buffer));
+    ret.append(buffer, in.gcount());
+    return ret;
+}
+
 void ResponseHandler::generateResponseFromFile(std::string path)
 {
 	std::ifstream file(path.c_str());
@@ -122,11 +133,7 @@ void ResponseHandler::generateResponseFromFile(std::string path)
 
 	if (file.is_open())
 	{
-		std::string line;
-		while (getline(file, line))
-		{
-			_res.body.append(line);
-		}
+		_res.body = readAllFile(file);
 		file.close();
 	}
 }
