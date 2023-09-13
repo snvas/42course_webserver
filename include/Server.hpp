@@ -39,6 +39,7 @@ private:
 	void handleIncomingRequest();
 	bool bindSocketAndListen(int index);
 	std::string numberToString(int number);
+	void printRequestDetails(const Request &request);
 	Server(const Server &other);
 };
 

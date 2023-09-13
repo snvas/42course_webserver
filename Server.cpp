@@ -231,48 +231,7 @@ void Server::processClientRequest(int clientfd)
 		RequestParser parser;
 		Request request = parser.parsingRequest(requestString);
 
-		std::cout << "Method: " << request.method << std::endl;
-		std::cout << "URI: " << request.uri << std::endl;
-		if (!request.query.empty())
-		{
-			std::cout << "Query: " << request.query << std::endl;
-		}
-		std::cout << "HTTP Version: " << request.httpVersion << std::endl;
-		std::cout << "Host: " << request.host << std::endl;
-		if (!request.port.empty())
-		{
-			std::cout << "Port: " << request.port << std::endl;
-		}
-		if (!request.content_length.empty())
-		{
-			std::cout << "Content-Lenght: " << request.content_length
-			          << std::endl;
-		}
-		if (!request.content_type.empty())
-		{
-			std::cout << "Content-Type: " << request.content_type << std::endl;
-		}
-		if (!request.user_agent.empty())
-		{
-			std::cout << "User-Agent: " << request.user_agent << std::endl;
-		}
-		if (!request.authorization.empty())
-		{
-			std::cout << "Authorization: " << request.authorization
-			          << std::endl;
-		}
-		if (!request.accept.empty())
-		{
-			std::cout << "Accept: " << request.accept << std::endl;
-		}
-		if (!request.cgi_path.empty())
-		{
-			std::cout << "CGI Path: " << request.cgi_path << std::endl;
-		}
-		if (!request.body.empty())
-		{
-			std::cout << "Body:\n" << request.body << std::endl;
-		}
+		printRequestDetails(request);
 
 		ResponseHandler handler(request,
 		                        m_config[m_clients[index].serverIndex]);
@@ -283,6 +242,53 @@ void Server::processClientRequest(int clientfd)
 		// TODO: verificar erros do send
 		close(clientfd);
 		// TODO: remover do pollfds também
+	}
+}
+
+void Server::printRequestDetails(const Request &request)
+{
+	std::cout << "Method: " << request.method << std::endl;
+	std::cout << "URI: " << request.uri << std::endl;
+	if (!request.query.empty())
+	{
+		std::cout << "Query: " << request.query << std::endl;
+	}
+	std::cout << "HTTP Version: " << request.httpVersion << std::endl;
+	std::cout << "Host: " << request.host << std::endl;
+	if (!request.port.empty())
+	{
+		std::cout << "Port: " << request.port << std::endl;
+	}
+	if (!request.content_length.empty())
+	{
+		std::cout << "Content-Lenght: " << request.content_length
+			  << std::endl;
+	}
+	if (!request.content_type.empty())
+	{
+		std::cout << "Content-Type: " << request.content_type
+			  << std::endl;
+	}
+	if (!request.user_agent.empty())
+	{
+		std::cout << "User-Agent: " << request.user_agent << std::endl;
+	}
+	if (!request.authorization.empty())
+	{
+		std::cout << "Authorization: " << request.authorization
+			  << std::endl;
+	}
+	if (!request.accept.empty())
+	{
+		std::cout << "Accept: " << request.accept << std::endl;
+	}
+	if (!request.cgi_path.empty())
+	{
+		std::cout << "CGI Path: " << request.cgi_path << std::endl;
+	}
+	if (!request.body.empty())
+	{
+		std::cout << "Body:\n" << request.body << std::endl;
 	}
 }
 
