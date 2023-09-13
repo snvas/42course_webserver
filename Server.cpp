@@ -99,16 +99,7 @@ bool Server::setSocketToNonBlocking(int socket)
 		return false;
 	}
 
-	int flags = fcntl(socket, F_GETFL, 0);
-	if (flags == -1)
-	{
-		std::cerr << "Cannot get socket flags." << std::endl;
-		return false;
-	}
-
-	flags |= O_NONBLOCK;
-
-	if (fcntl(socket, F_SETFL, flags) == -1)
+	if (fcntl(socket, F_SETFL, O_NONBLOCK) == -1)
 	{
 		std::cerr << "Cannot set socket to non-blocking." << std::endl;
 		return false;

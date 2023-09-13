@@ -12,8 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Lista de variáveis de ambiente esperadas pelo php-cgi
 $expected_env_vars = [
     'GATEWAY_INTERFACE', 'HTTP_ACCEPT',
-    'HTTP_HOST', 'HTTP_USER_AGENT', 'PATH_INFO', 
-	'PATH_TRANSLATED', 'QUERY_STRING',
+    'HTTP_HOST', 'HTTP_USER_AGENT', 'PATH_TRANSLATED', 
     'REDIRECT_STATUS', 'REMOTE_ADDR', 'REMOTE_PORT',
     'REQUEST_METHOD', 'REQUEST_URI', 'SCRIPT_FILENAME',
     'SCRIPT_NAME', 'SERVER_NAME', 'SERVER_PORT',
@@ -21,7 +20,7 @@ $expected_env_vars = [
     'CONTENT_TYPE'
 ];
 
-echo "<h2>Teste de variáveis de ambiente para php-cgi</h2>";
+echo "<h2>Teste de vari&aacute;veis de ambiente para php-cgi</h2>";
 
 	foreach ($expected_env_vars as $var) {
 		if (isset($_SERVER[$var])) {
