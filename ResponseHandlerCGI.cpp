@@ -170,12 +170,25 @@ bool ResponseHandler::isCGIRequest(const std::string &uri)
 
 	// Extrair a extensão da URI
 	std::string extension = uri.substr(lastDot);
+	// Primeiro, verifique se a extensão está na lista de extensões CGI da
+	// configuração global
+	if (std::find(_conf.cgi_extensions.begin(), _conf.cgi_extensions.end(),
+		      extension) != _conf.cgi_extensions.end())
+		return true;
 
-	// Verificar se a extensão está na lista de extensões CGI
-	return std::find(_conf.cgi_extensions.begin(),
-			 _conf.cgi_extensions.end(),
-			 extension) != _conf.cgi_extensions.end();
+	// Em seguida, verifique se a extensão está na lista de extensões CGI da
+	// configuração de localização (se houver uma configurada)
+	if (_locationConf &&
+	    std::find(_locationConf->cgi_extensions.begin(),
+		      _locationConf->cgi_extensions.end(),
+		      extension) != _locationConf->cgi_extensions.end())
+		return true;
+
+	// Se a extensão não foi encontrada em nenhum dos dois, não é uma
+	// solicitação CGI
+	return false;
 }
+
 
 std::string ResponseHandler::getCgiPathFromUri(const std::string &uri)
 {
