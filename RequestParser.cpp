@@ -8,13 +8,34 @@ Request::Request()
 	uri = "";
 	httpVersion = "";
 	body = "";
-	content_length = "";
 	content_type = "";
 	user_agent = "";
 	authorization = "";
 	accept = "";
 	query = "";
 	cgi_path = "";
+}
+
+void Request::display(){
+	Request req;
+	std::cout << "---------------DISPLAY REQUEST-------------------" << std::endl;
+	std::cout << "Method: " + req.method << std::endl;
+	std::cout << "Port: " + req.port << std::endl;
+	std::cout << "Host: " + req.host << std::endl;
+	std::cout << "URI: " + req.uri << std::endl;
+	std::cout << "Version: " + req.httpVersion << std::endl;
+	if (req.content_type != "")
+		std::cout << "Content-Type: " + req.content_type << std::endl;
+	if (req.user_agent != "")
+		std::cout << "User-Agent: " + req.user_agent << std::endl;
+	if (req.authorization != "")
+		std::cout << "Authorization: " + req.authorization << std::endl;
+	if (req.query != "")
+		std::cout << "Query:" + req.query << std::endl;
+	if (req.cgi_path != "")
+		std::cout << "CGI Path:" + req.cgi_path << std::endl;
+	if (req.body != "")
+		std::cout << "Body:" + req.body << std::endl;
 }
 
 Request RequestParser::parsingRequest(const std::string &rawRequest)
@@ -107,3 +128,4 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 	req.body = bodyStream.str();
 	return req;
 }
+

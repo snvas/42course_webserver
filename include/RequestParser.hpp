@@ -22,6 +22,7 @@ public:
 	std::map<std::string, std::string> headers;
 
 	Request();
+	void display();
 };
 
 class RequestParser

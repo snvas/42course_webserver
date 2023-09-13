@@ -1,24 +1,38 @@
 #!/usr/bin/php
 
-<html>
- <head>
-  <title>Curso PHP Progressivo</title>
- </head>
- <body>
-   <form   action="" method="get">
- Numero 1: <input type="text" name="num1"><br>
- Numero 2: <input type="text" name="num2"><br>
- <input type="submit">
-   </form>
- 
-   <?php 
- $num1 = $_GET['num1'];
- $num2 = $_GET['num2'];
- echo "Soma         : ","$num1+$num2 = ",$num1+$num2, "<br />";
- echo "Subtração        : ","$num1-$num2 = ",$num1-$num2, "<br />";
- echo "Multiplicação    : ","$num1*$num2 = ",$num1*$num2, "<br />";
- echo "Divisão         : ","$num1/$num2 = ",$num1/$num2, "<br />";
- echo "Resto da divisão : ","$num1%$num2 = ",$num1%$num2, "<br />";
-   ?>
- </body>
-</html>
+<?php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	$postData = file_get_contents("php://input");
+	parse_str($postData, $_POST);
+
+    $num1 = $_POST["num1"];
+    $num2 = $_POST["num2"];
+    $operation = $_POST["operation"];
+    $result = 0;
+
+    switch ($operation) {
+        case "add":
+            $result = $num1 + $num2;
+            break;
+        case "subtract":
+            $result = $num1 - $num2;
+            break;
+        case "multiply":
+            $result = $num1 * $num2;
+            break;
+        case "divide":
+            if($num2 != 0){
+                $result = $num1 / $num2;
+            } else {
+                echo "Divisão por zero não é permitida.";
+                exit;
+            }
+            break;
+        default:
+            echo "Operação inválida.";
+            exit;
+    }
+
+    echo "Resultado: " . $result;
+}
+?>
