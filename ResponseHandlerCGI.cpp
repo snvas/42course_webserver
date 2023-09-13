@@ -91,8 +91,8 @@ std::string ResponseHandler::readCGIOutput(int pipefd[])
 	{
 		output.append(buffer, bytesRead);
 	}
-	close(pipefd[0]); // Fechar a extremidade de leitura do pipe
 	std::cout << "Saída do CGI: " << output << std::endl;
+	close(pipefd[0]); // Fechar a extremidade de leitura do pipe
 	return output;
 }
 
