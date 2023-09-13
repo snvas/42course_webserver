@@ -7,7 +7,7 @@ void sigint_handler(int sig)
 {
 	std::cout << '\n';
 	std::cerr << "Rceived signal " << (sig + 128) << std::endl;
-	// webServer.stop();
+	webServer.stop();
 	exit(0);
 }
 

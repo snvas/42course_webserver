@@ -40,6 +40,7 @@ private:
 	bool bindSocketAndListen(int index);
 	std::string numberToString(int number);
 	void printRequestDetails(const Request &request);
+	void closeClientSocket(int clientfd);
 	Server(const Server &other);
 };
 
