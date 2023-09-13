@@ -6,6 +6,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 $query = $_SERVER['QUERY_STRING'];
 $con_type = $_SERVER['CONTENT_TYPE'];
 $length = $_SERVER['CONTENT_LENGTH'];
+$server = $_SERVER['SERVER_NAME'];
 
 echo "<html>";
 echo "<head>";

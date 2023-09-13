@@ -9,15 +9,12 @@ std::vector<std::string> split(const std::string &s, char delimiter){
 	}
 	return tokens;
 }
-
 std::string ResponseHandler::resolveBinaryPath(void){
 	std::string resolve;
 	std::vector<std::string> splitPath;
 	char* path = std::getenv("PATH");
-
 	if (!path)
 		return "";
-	
 	splitPath = split(std::string(path), ':');
 	for (std::vector<std::string>::iterator it = splitPath.begin(); it != splitPath.end(); ++it){
 		resolve = (*it) + "/" + _binary;
@@ -25,7 +22,6 @@ std::string ResponseHandler::resolveBinaryPath(void){
 			return resolve;
 	}
 	return "";
-
 }
 
 void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
@@ -38,17 +34,17 @@ void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
 	envVec.push_back("SCRIPT_NAME=" + _req.cgi_path);
 	envVec.push_back("SCRIPT_FILENAME=" + _req.cgi_path);
 	envVec.push_back("REQUEST_METHOD=" + _req.method);
-	envVec.push_back("CONTENT_LENGTH=" + _req.content_length);
+	envVec.push_back("CONTENT_LENGTH=" + _req.body);
 	envVec.push_back("CONTENT_TYPE=" + _req.content_type);
-	envVec.push_back("PATH_INFO=" + _req.uri);
+	envVec.push_back("PATH_INFO=" + _req.cgi_path);
 	envVec.push_back("PATH_TRANSLATED=" + _req.cgi_path);
 	envVec.push_back("QUERY_STRING=" + _req.query);
-	envVec.push_back("REMOTE_ADDR=" + _req.port);
+	envVec.push_back("REMOTEaddr=" + _req.port);
 	envVec.push_back("REMOTE_IDENT=" + _req.authorization);
 	envVec.push_back("REMOTE_USER=" + _req.authorization);
-	envVec.push_back("REQUEST_URI=" + _req.cgi_path + "?" + _req.query);
+	envVec.push_back("REQUEST_URI=" + _req.uri + "?" + _req.query);
 	envVec.push_back("SERVER_NAME=" + _req.host);
-	envVec.push_back("SERVER_PROTOCOL=http/1.1");
+	envVec.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	envVec.push_back("SERVER_SOFTWARE=Webserver/1.0");
 	envVec.push_back("HTTP_USER_AGENT=" + _req.user_agent);
 	envVec.push_back("HTTP_ACCEPT=" + _req.accept);
@@ -122,11 +118,9 @@ void ResponseHandler::handleCGI(const std::string &cgiPath)
 		close(pipefd[1]);
 		return generateErrorResponse(500);
 	}
-
 	std::vector<std::string> envVec;
 	char **envp = NULL;
 	setupEnviroment(envVec, envp);
-
 	// Código do processo filho
 	if (pid == 0)
 	{
@@ -139,7 +133,7 @@ void ResponseHandler::handleCGI(const std::string &cgiPath)
 		std::string responseBody = readCGIOutput(pipefd);
 		waitpid(pid, NULL, 0); // Aguardar o processo filho terminar
 
-		_res.httpVersion = "HTTP/1.1";
+		_res.httpVersion = "HTTP/1.1 ";
 		_res.statusCode = 200;
 		_res.headers["Content-Type"] = getMimeType(".html");
 		_res.body = responseBody;
