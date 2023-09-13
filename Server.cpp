@@ -229,10 +229,11 @@ void Server::processClientRequest(int clientfd)
 		std::string response = handler.getResponse();
 
 		std::cout << "\n\nresponse: \n" << response << std::endl;
-		send(clientfd, response.c_str(), response.length(), 0);
-		// TODO: verificar erros do send
-		close(clientfd);
-		// TODO: remover do pollfds também
+		if (send(clientfd, response.c_str(), response.length(), 0) == -1)
+		{
+			std::cerr << "error sending response" << std::endl;
+		}
+		closeClientSocket(clientfd);
 	}
 }
 
@@ -252,13 +253,11 @@ void Server::printRequestDetails(const Request &request)
 	}
 	if (!request.content_length.empty())
 	{
-		std::cout << "Content-Lenght: " << request.content_length
-			  << std::endl;
+		std::cout << "Content-Lenght: " << request.content_length << std::endl;
 	}
 	if (!request.content_type.empty())
 	{
-		std::cout << "Content-Type: " << request.content_type
-			  << std::endl;
+		std::cout << "Content-Type: " << request.content_type << std::endl;
 	}
 	if (!request.user_agent.empty())
 	{
@@ -266,8 +265,7 @@ void Server::printRequestDetails(const Request &request)
 	}
 	if (!request.authorization.empty())
 	{
-		std::cout << "Authorization: " << request.authorization
-			  << std::endl;
+		std::cout << "Authorization: " << request.authorization << std::endl;
 	}
 	if (!request.accept.empty())
 	{
@@ -295,4 +293,28 @@ void Server::stop(void)
 	std::cout << "Stopping Webserver" << std::endl;
 	this->m_pollfds.clear();
 	std::cout << "Good Bye!!" << std::endl;
+}
+
+void Server::closeClientSocket(int clientfd)
+{
+	close(clientfd);
+
+	for (std::vector<ClientSocket>::iterator it = m_clients.begin();
+	     it != m_clients.end(); it++)
+	{
+		if (it->clienfd == clientfd)
+		{
+			m_clients.erase(it);
+			it--;
+		}
+	}
+	for (std::vector<pollfd>::iterator it = m_pollfds.begin();
+	     it != m_pollfds.end(); it++)
+	{
+		if (it->fd == clientfd)
+		{
+			m_pollfds.erase(it);
+			it--;
+		}
+	}
 }

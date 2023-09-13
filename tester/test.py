@@ -5,6 +5,7 @@ import json
 
 port = "3010"
 server1_url = "http://localhost:" + port
+server2_url = "http://localhost:9000"
 
 def test_get_root():
     res = requests.get(server1_url )
@@ -27,7 +28,7 @@ def test_not_allowed_method_server():
     assert res.status_code == 405
 
 def test_not_allowed_method_location():
-    res = requests.post(server1_url)
+    res = requests.patch(server1_url)
     assert res.status_code == 405
 
 def test_directory_listing():
@@ -64,8 +65,18 @@ def test_post_method():
     assert res.status_code == 201
 
 def test_body_too_large():
-    body = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"  
+    body = ""
+    for i in range(101):
+        body += str(i%10)
     res = requests.get(server1_url, data=body)
 
     assert res.status_code == 413
 
+def test_second_server():
+    url = server2_url
+    res = requests.get(url)
+    expected = ""
+    for line in open("www/hello.html"):
+        expected += line.strip('\n')
+
+    assert res.text == expected

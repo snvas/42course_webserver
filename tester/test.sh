@@ -1,1 +1,0 @@
-curl -X POST http://localhost:3010/teste2 -H "Content-Type: application/xml" -d "<Request><Login>my_login</Login><Password>my_password</Password></Request>"
