@@ -52,7 +52,7 @@ private:
 	bool isValidCGIScript(const std::string &cgiPath);
 	void setupEnviroment(std::vector<std::string> &envVec, char **&envp);
 	void executeCGIInChild(const std::string &cgiPath, char **envp,
-	                       int pipefd[]);
+                                        int outPipe[], int inPipe[]);
 	std::string readCGIOutput(int pipefd[]);
 	bool isCGIRequest(const std::string &uri);
 	std::string getCgiPathFromUri(const std::string &uri);

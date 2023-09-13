@@ -22,30 +22,35 @@ std::string ResponseHandler::resolveBinaryPath(void){
 			return resolve;
 	}
 	return "";
+	//return "/usr/bin/php-cgi";
 }
 
 void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
                                       char **&envp)
 {
+	std::cout << "Configurando variáveis de ambiente..." << std::endl;
 	envVec.push_back("HTTP_HOST=" + _req.host);
 	envVec.push_back("AUTH_TYPE=" + _req.authorization);
 	envVec.push_back("REDIRECT_STATUS=200");
 	envVec.push_back("GATEWAY_INTERFACE=CGI/1.1");
 	envVec.push_back("SCRIPT_NAME=" + _req.cgi_path);
+	envVec.push_back("DOCUMENT_ROOT=" + _req.cgi_path);
 	envVec.push_back("SCRIPT_FILENAME=" + _req.cgi_path);
 	envVec.push_back("REQUEST_METHOD=" + _req.method);
-	envVec.push_back("CONTENT_LENGTH=" + _req.body);
+	envVec.push_back("CONTENT_LENGTH=" + _req.content_length);
 	envVec.push_back("CONTENT_TYPE=" + _req.content_type);
 	envVec.push_back("PATH_INFO=" + _req.cgi_path);
 	envVec.push_back("PATH_TRANSLATED=" + _req.cgi_path);
 	envVec.push_back("QUERY_STRING=" + _req.query);
-	envVec.push_back("REMOTEaddr=" + _req.port);
+	envVec.push_back("REMOTE_PORT=" + _req.port);
+	envVec.push_back("REMOTE_ADDR=" + _req.port);
 	envVec.push_back("REMOTE_IDENT=" + _req.authorization);
 	envVec.push_back("REMOTE_USER=" + _req.authorization);
 	envVec.push_back("REQUEST_URI=" + _req.uri + "?" + _req.query);
 	envVec.push_back("SERVER_NAME=" + _req.host);
 	envVec.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	envVec.push_back("SERVER_SOFTWARE=Webserver/1.0");
+	envVec.push_back("SERVER_PORT=" + _req.port);
 	envVec.push_back("HTTP_USER_AGENT=" + _req.user_agent);
 	envVec.push_back("HTTP_ACCEPT=" + _req.accept);
 
@@ -58,13 +63,17 @@ void ResponseHandler::setupEnviroment(std::vector<std::string> &envVec,
 }
 
 void ResponseHandler::executeCGIInChild(const std::string &cgiPath, char **envp,
-                                        int pipefd[])
+                                        int outPipe[], int inPipe[])
 {
-	close(pipefd[0]);               // Fechar a extremidade de leitura do pipe
-	dup2(pipefd[1], STDOUT_FILENO); // Redirecionar stdout para o pipe
-	close(pipefd[1]); // Fechar a extremidade de escrita original do pipe
+	close(outPipe[0]);               // Fechar a extremidade de leitura do pipe
+	dup2(outPipe[1], STDOUT_FILENO); // Redirecionar stdout para o pipe
+	close(outPipe[1]); // Fechar a extremidade de escrita original do pipe
+
+	dup2(inPipe[0], STDIN_FILENO);
+	close(inPipe[0]);
 	char *const argv[] = {const_cast<char *>(cgiPath.c_str()), NULL};
 	// Executar o script CGI
+	
 	if (execve(cgiPath.c_str(), argv, envp) == -1)
 	{
 		perror("execve");
@@ -83,6 +92,7 @@ std::string ResponseHandler::readCGIOutput(int pipefd[])
 		output.append(buffer, bytesRead);
 	}
 	close(pipefd[0]); // Fechar a extremidade de leitura do pipe
+	std::cout << "Saída do CGI: " << output << std::endl;
 	return output;
 }
 
@@ -110,6 +120,16 @@ void ResponseHandler::handleCGI(const std::string &cgiPath)
 		return generateErrorResponse(500);
 	}
 
+	int inPipe[2];
+
+	if (pipe(inPipe) == -1){
+		perror("pipe for stdin");
+		return generateErrorResponse(500);
+	}
+
+	write(inPipe[1], _req.body.c_str(), _req.body.size());
+	close(inPipe[1]);
+
 	pid_t pid = fork(); // Criar um novo processo
 	if (pid == -1)
 	{
@@ -124,7 +144,7 @@ void ResponseHandler::handleCGI(const std::string &cgiPath)
 	// Código do processo filho
 	if (pid == 0)
 	{
-		executeCGIInChild(cgiPath, envp, pipefd);
+		executeCGIInChild(cgiPath, envp, pipefd, inPipe);
 	}
 	// Código do processo pai
 	else
