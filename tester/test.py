@@ -62,3 +62,10 @@ def test_post_method():
 
     res = requests.post(url, data=body)
     assert res.status_code == 201
+
+def test_body_too_large():
+    body = "01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"  
+    res = requests.get(server1_url, data=body)
+
+    assert res.status_code == 413
+
