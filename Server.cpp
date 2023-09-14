@@ -80,7 +80,8 @@ bool Server::initializeServer(int index)
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
 	m_serverSocks.push_back(m_listenSocket);
-	std::cout << GREEN << "Server started on port: " + m_config[index].server_name +
+	std::cout << GREEN
+	          << "Server started on port: " + m_config[index].server_name +
 	                 ":" + numberToString(m_config[index].listen_port)
 	          << RESET << std::endl;
 
@@ -195,17 +196,29 @@ void Server::acceptNewConnection(int serverindex)
 		client.clientfd = clientfd;
 		client.serverIndex = serverindex;
 		client.request = "";
-		client.contentLength = 0;
+		client.contentLength = -1;
 		m_clients.push_back(client);
 	}
 }
 
-bool endsDelimiters(std::string buffer)
+bool hasEndsDelimiters(std::string buffer)
 {
 	size_t pos = 0;
 
 	pos = buffer.rfind("\r\n\r\n");
-	return (pos + 4 == buffer.size() && buffer.size() > 4);
+	return (pos != 0);
+}
+
+template <typename T> static bool vectorContains(std::vector<T> vec, T target)
+{
+	for (size_t i = 0; i < vec.size(); i++)
+	{
+		if (vec[i] == target)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void Server::processClientRequest(ClientSocket *clientSocket)
@@ -215,13 +228,13 @@ void Server::processClientRequest(ClientSocket *clientSocket)
 
 	ssize_t bytesRead =
 	    recv(clientSocket->clientfd, buffer, sizeof(buffer) - 1, 0);
-	
+
 	while (bytesRead > 0)
 	{
 		clientSocket->request.append(buffer, bytesRead);
 		size_t chunked = clientSocket->request.find("chunked");
 		if (chunked != std::string::npos) break;
-		if (endsDelimiters(clientSocket->request))
+		if (hasEndsDelimiters(clientSocket->request))
 		{
 			size_t found = clientSocket->request.find("Content-Length: ");
 			if (found != std::string::npos)
@@ -230,23 +243,30 @@ void Server::processClientRequest(ClientSocket *clientSocket)
 				found = temp.find(" ");
 				temp = temp.substr(found + 1);
 				int v = atoi(temp.c_str());
-				if (v != 0)
-				{
-					clientSocket->contentLength = v;
-				}
+				clientSocket->contentLength = v;
+			}
+			else
+			{
+				clientSocket->contentLength = 0;
 			}
 		}
 		bytesRead = recv(clientSocket->clientfd, buffer, sizeof(buffer) - 1, 0);
 	}
 	RequestParser parser;
 	Request request = parser.parsingRequest(clientSocket->request);
-	
+
 	// verificar se não atingiu max_body_size
-	bool maxBodySize = (int)request.body.size() >
+	bool maxBodySize = (int) request.body.size() >
 	                   m_config[clientSocket->serverIndex].client_max_body_size;
 
-	bool sizeCorrect = clientSocket->contentLength == (int) request.body.size();
-	if (maxBodySize || sizeCorrect)
+	bool reachedBody = clientSocket->contentLength != -1 &&
+	                   clientSocket->contentLength == (int) request.body.size();
+
+	bool invalidMethod =
+	    hasEndsDelimiters(clientSocket->request) &&
+	    !vectorContains(m_config[clientSocket->serverIndex].allowed_method,
+	                    request.method);
+	if (bytesRead == 0 || maxBodySize || reachedBody || invalidMethod)
 	{
 		printRequestDetails(request);
 
@@ -266,40 +286,47 @@ void Server::processClientRequest(ClientSocket *clientSocket)
 void Server::printRequestDetails(const Request &request)
 {
 	std::cout << PURPLE << "Method: " << request.method << RESET << std::endl;
-	std::cout << PURPLE << "URI: " << request.uri << RESET  << std::endl;
+	std::cout << PURPLE << "URI: " << request.uri << RESET << std::endl;
 	if (!request.query.empty())
 	{
 		std::cout << PURPLE << "Query: " << request.query << RESET << std::endl;
 	}
-	std::cout << PURPLE << "HTTP Version: " << request.httpVersion << RESET << std::endl;
-	std::cout << PURPLE << "Host: " << request.host << RESET<< std::endl;
+	std::cout << PURPLE << "HTTP Version: " << request.httpVersion << RESET
+	          << std::endl;
+	std::cout << PURPLE << "Host: " << request.host << RESET << std::endl;
 	if (!request.port.empty())
 	{
 		std::cout << PURPLE << "Port: " << request.port << RESET << std::endl;
 	}
 	if (!request.content_length.empty())
 	{
-		std::cout << PURPLE << "Content-Lenght: " << request.content_length << RESET << std::endl;
+		std::cout << PURPLE << "Content-Lenght: " << request.content_length
+		          << RESET << std::endl;
 	}
 	if (!request.content_type.empty())
 	{
-		std::cout << PURPLE << "Content-Type: " << request.content_type << RESET << std::endl;
+		std::cout << PURPLE << "Content-Type: " << request.content_type << RESET
+		          << std::endl;
 	}
 	if (!request.user_agent.empty())
 	{
-		std::cout << PURPLE << "User-Agent: " << request.user_agent << RESET << std::endl;
+		std::cout << PURPLE << "User-Agent: " << request.user_agent << RESET
+		          << std::endl;
 	}
 	if (!request.authorization.empty())
 	{
-		std::cout << PURPLE << "Authorization: " << request.authorization << RESET << std::endl;
+		std::cout << PURPLE << "Authorization: " << request.authorization
+		          << RESET << std::endl;
 	}
 	if (!request.accept.empty())
 	{
-		std::cout << PURPLE << "Accept: " << request.accept << RESET << std::endl;
+		std::cout << PURPLE << "Accept: " << request.accept << RESET
+		          << std::endl;
 	}
 	if (!request.cgi_path.empty())
 	{
-		std::cout << PURPLE << "CGI Path: " << request.cgi_path << RESET << std::endl;
+		std::cout << PURPLE << "CGI Path: " << request.cgi_path << RESET
+		          << std::endl;
 	}
 	if (!request.body.empty())
 	{

@@ -68,7 +68,7 @@ def test_body_too_large():
     body = ""
     for i in range(101):
         body += str(i%10)
-    res = requests.get(server1_url, data=body)
+    res = requests.get(server2_url, data=body)
 
     assert res.status_code == 413
 
