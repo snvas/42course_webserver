@@ -159,7 +159,17 @@ void Server::handleIncomingRequest()
 			}
 			else
 			{
-				processClientRequest(m_pollfds[i].fd);
+				ClientSocket *ptr = 0;
+				for (std::vector<ClientSocket>::iterator it = m_clients.begin();
+				     it != m_clients.end(); it++)
+				{
+					if (it->clientfd == m_pollfds[i].fd)
+					{
+						ptr = &(*it);
+						break;
+					}
+				}
+				processClientRequest(ptr);
 			}
 		}
 	}
@@ -182,58 +192,74 @@ void Server::acceptNewConnection(int serverindex)
 		struct pollfd pfd = {clientfd, POLLIN, 0};
 		m_pollfds.push_back(pfd);
 		ClientSocket client;
-		client.clienfd = clientfd;
+		client.clientfd = clientfd;
 		client.serverIndex = serverindex;
+		client.request = "";
+		client.contentLength = 0;
 		m_clients.push_back(client);
 	}
 }
 
-void Server::processClientRequest(int clientfd)
+bool endsDelimiters(std::string buffer)
+{
+	size_t pos = 0;
+
+	pos = buffer.rfind("\r\n\r\n");
+	return (pos + 4 == buffer.size() && buffer.size() > 4);
+}
+
+void Server::processClientRequest(ClientSocket *clientSocket)
 {
 	char buffer[1024];
 	memset(buffer, 0, 1024);
-	std::string requestString = "";
 
-	int index;
-	for (size_t i = 0; i < m_clients.size(); i++)
-	{
-		if (m_clients[i].clienfd == clientfd) index = i;
-	}
-
-	ssize_t bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
+	ssize_t bytesRead =
+	    recv(clientSocket->clientfd, buffer, sizeof(buffer) - 1, 0);
+	
 	while (bytesRead > 0)
 	{
-		requestString.append(buffer, bytesRead);
-
-		size_t found = requestString.find("Content-Length: ");
-		if (found != std::string::npos)
+		clientSocket->request.append(buffer, bytesRead);
+		size_t chunked = clientSocket->request.find("chunked");
+		if (chunked != std::string::npos) break;
+		if (endsDelimiters(clientSocket->request))
 		{
-			std::string temp = requestString.substr(found);
-			found = temp.find(" ");
-			temp = temp.substr(found + 1);
-			int v = atoi(temp.c_str());
-			if (v != 0) sleep(1);
+			size_t found = clientSocket->request.find("Content-Length: ");
+			if (found != std::string::npos)
+			{
+				std::string temp = clientSocket->request.substr(found);
+				found = temp.find(" ");
+				temp = temp.substr(found + 1);
+				int v = atoi(temp.c_str());
+				if (v != 0)
+				{
+					clientSocket->contentLength = v;
+				}
+			}
 		}
-		bytesRead = recv(clientfd, buffer, sizeof(buffer) - 1, 0);
+		bytesRead = recv(clientSocket->clientfd, buffer, sizeof(buffer) - 1, 0);
 	}
+	RequestParser parser;
+	Request request = parser.parsingRequest(clientSocket->request);
+	
+	// verificar se não atingiu max_body_size
+	bool maxBodySize = (int)request.body.size() >
+	                   m_config[clientSocket->serverIndex].client_max_body_size;
 
-	if (!requestString.empty())
+	bool sizeCorrect = clientSocket->contentLength == (int) request.body.size();
+	if (maxBodySize || sizeCorrect)
 	{
-		RequestParser parser;
-		Request request = parser.parsingRequest(requestString);
-
 		printRequestDetails(request);
 
-		ResponseHandler handler(request,
-		                        m_config[m_clients[index].serverIndex]);
+		ResponseHandler handler(request, m_config[clientSocket->serverIndex]);
 		std::string response = handler.getResponse();
 
 		std::cout << "\n\nresponse: \n" << response << std::endl;
-		if (send(clientfd, response.c_str(), response.length(), 0) == -1)
+		if (send(clientSocket->clientfd, response.c_str(), response.length(),
+		         0) == -1)
 		{
 			std::cerr << "error sending response" << std::endl;
 		}
-		closeClientSocket(clientfd);
+		closeClientSocket(clientSocket->clientfd);
 	}
 }
 
@@ -302,7 +328,7 @@ void Server::closeClientSocket(int clientfd)
 	for (std::vector<ClientSocket>::iterator it = m_clients.begin();
 	     it != m_clients.end(); it++)
 	{
-		if (it->clienfd == clientfd)
+		if (it->clientfd == clientfd)
 		{
 			m_clients.erase(it);
 			it--;

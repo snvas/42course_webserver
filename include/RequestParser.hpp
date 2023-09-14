@@ -19,6 +19,7 @@ public:
 	std::string accept;
 	std::string query;
 	std::string cgi_path;
+	std::string transfer_encoding;
 	std::map<std::string, std::string> headers;
 
 	Request();

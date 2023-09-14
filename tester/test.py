@@ -77,6 +77,6 @@ def test_second_server():
     res = requests.get(url)
     expected = ""
     for line in open("www/hello.html"):
-        expected += line.strip('\n')
+        expected += line
 
     assert res.text == expected
