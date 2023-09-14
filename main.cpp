@@ -24,8 +24,7 @@ int main(int argc, char **argv)
 	sigaction(SIGINT, &sigIntHandler, NULL);
 
 	std::vector<ServerConfig> configServers = parseConfiguration(configContent);
-	printServerConfigurations(configServers);
-
+	
 	if (!configServers.empty())
 	{
 		Server webServer(configServers);
