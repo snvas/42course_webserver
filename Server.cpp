@@ -6,7 +6,7 @@ Server::Server()
 
 Server::Server(const std::vector<ServerConfig> &config) : m_config(config)
 {
-	std::cout << GREEN << "Webserv running 🏃" << RESET << std::endl;
+	std::cout << "Webserv running " << std::endl;
 
 	for (int i = 0; i < (int) m_config.size(); i++)
 	{
@@ -80,9 +80,9 @@ bool Server::initializeServer(int index)
 	struct pollfd pfd = {m_listenSocket, POLLIN, 0};
 	m_pollfds.push_back(pfd);
 	m_serverSocks.push_back(m_listenSocket);
-	std::cout << GREEN << "Server started on port: " + m_config[index].server_name +
+	std::cout << "Server started on port: " + m_config[index].server_name +
 	                 ":" + numberToString(m_config[index].listen_port)
-	          << RESET << std::endl;
+	          << std::endl;
 
 	return true;
 }
@@ -239,45 +239,45 @@ void Server::processClientRequest(int clientfd)
 
 void Server::printRequestDetails(const Request &request)
 {
-	std::cout << PURPLE << "Method: " << request.method << RESET << std::endl;
-	std::cout << PURPLE << "URI: " << request.uri << RESET  << std::endl;
+	std::cout << "Method: " << request.method << std::endl;
+	std::cout << "URI: " << request.uri << std::endl;
 	if (!request.query.empty())
 	{
-		std::cout << PURPLE << "Query: " << request.query << RESET << std::endl;
+		std::cout << "Query: " << request.query << std::endl;
 	}
-	std::cout << PURPLE << "HTTP Version: " << request.httpVersion << RESET << std::endl;
-	std::cout << PURPLE << "Host: " << request.host << RESET<< std::endl;
+	std::cout << "HTTP Version: " << request.httpVersion << std::endl;
+	std::cout << "Host: " << request.host << std::endl;
 	if (!request.port.empty())
 	{
-		std::cout << PURPLE << "Port: " << request.port << RESET << std::endl;
+		std::cout << "Port: " << request.port << std::endl;
 	}
 	if (!request.content_length.empty())
 	{
-		std::cout << PURPLE << "Content-Lenght: " << request.content_length << RESET << std::endl;
+		std::cout << "Content-Lenght: " << request.content_length << std::endl;
 	}
 	if (!request.content_type.empty())
 	{
-		std::cout << PURPLE << "Content-Type: " << request.content_type << RESET << std::endl;
+		std::cout << "Content-Type: " << request.content_type << std::endl;
 	}
 	if (!request.user_agent.empty())
 	{
-		std::cout << PURPLE << "User-Agent: " << request.user_agent << RESET << std::endl;
+		std::cout << "User-Agent: " << request.user_agent << std::endl;
 	}
 	if (!request.authorization.empty())
 	{
-		std::cout << PURPLE << "Authorization: " << request.authorization << RESET << std::endl;
+		std::cout << "Authorization: " << request.authorization << std::endl;
 	}
 	if (!request.accept.empty())
 	{
-		std::cout << PURPLE << "Accept: " << request.accept << RESET << std::endl;
+		std::cout << "Accept: " << request.accept << std::endl;
 	}
 	if (!request.cgi_path.empty())
 	{
-		std::cout << PURPLE << "CGI Path: " << request.cgi_path << RESET << std::endl;
+		std::cout << "CGI Path: " << request.cgi_path << std::endl;
 	}
 	if (!request.body.empty())
 	{
-		std::cout << PURPLE << "Body:\n" << request.body << RESET << std::endl;
+		std::cout << "Body:\n" << request.body << std::endl;
 	}
 }
 
@@ -290,9 +290,9 @@ std::string Server::numberToString(int number)
 
 void Server::stop(void)
 {
-	std::cout << GREEN << "Stopping Webserver" << RESET << std::endl;
+	std::cout << "Stopping Webserver" << std::endl;
 	this->m_pollfds.clear();
-	std::cout << GREEN << "Good Bye!!" << RESET << std::endl;
+	std::cout << "Good Bye!!" << std::endl;
 }
 
 void Server::closeClientSocket(int clientfd)
