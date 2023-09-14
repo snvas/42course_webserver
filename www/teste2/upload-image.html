@@ -15,14 +15,15 @@
 		<h2><strong>Envio de imagens</strong></h2>
 		<hr>
 
-		<form action="upload-image.php" method="post" enctype="multipart/form-data">
+		<form action="http://localhost:3010/cgi-bin/upload.py" method="post" enctype="multipart/form-data">
 			<label for="conteudo">Selecione uma imagem para Enviar:</label>
-			<input type="file" name="pic" id="pic" accept="image/*" class="form-control">
+			<input type="file" name="image" class="form-control">
 
 			<div align="center">
 				<input type="submit" class="btn btn-success" value="Upload Image" name="submit">
 			</div>
-		
+		</form>
+
 	</div>
 
 	<body>

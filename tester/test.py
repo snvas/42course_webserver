@@ -68,7 +68,7 @@ def test_body_too_large():
     body = ""
     for i in range(101):
         body += str(i%10)
-    res = requests.get(server1_url, data=body)
+    res = requests.get(server2_url, data=body)
 
     assert res.status_code == 413
 
@@ -77,6 +77,6 @@ def test_second_server():
     res = requests.get(url)
     expected = ""
     for line in open("www/hello.html"):
-        expected += line.strip('\n')
+        expected += line
 
     assert res.text == expected

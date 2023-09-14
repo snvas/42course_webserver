@@ -70,6 +70,11 @@ void ResponseHandler::useLocationConfig()
 
 bool ResponseHandler::hasErrors()
 {
+	if (_req.transfer_encoding == "chunked")
+	{
+		generateErrorResponse(400);
+	}
+	
 	// check server_name
 	if (_conf.server_name != _req.host)
 	{

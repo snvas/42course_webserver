@@ -10,8 +10,10 @@
 
 struct ClientSocket
 {
-	int clienfd;
+	int clientfd;
 	int serverIndex;
+	std::string request;
+	int contentLength;
 };
 
 class Server
@@ -24,7 +26,7 @@ public:
 
 	bool initializeServer(int index);
 	void run();
-	void processClientRequest(int clientfd);
+	void processClientRequest(ClientSocket *clientSocket);
 	void acceptNewConnection(int serverSocket);
 	void stop();
 

@@ -122,6 +122,10 @@ Request RequestParser::parsingRequest(const std::string &rawRequest)
 				{
 					req.cgi_path = headerValue;
 				}
+				else if (headername == "Transfer-Encoding")
+				{
+					req.transfer_encoding = headerValue;
+				}
 			}
 		}
 	}
