@@ -18,24 +18,24 @@ Request::Request()
 
 void Request::display(){
 	Request req;
-	std::cout << "---------------DISPLAY REQUEST-------------------" << std::endl;
-	std::cout << "Method: " + req.method << std::endl;
-	std::cout << "Port: " + req.port << std::endl;
-	std::cout << "Host: " + req.host << std::endl;
-	std::cout << "URI: " + req.uri << std::endl;
-	std::cout << "Version: " + req.httpVersion << std::endl;
+	std::cout << PURPLE << "---------------DISPLAY REQUEST-------------------" << RESET << std::endl;
+	std::cout << PURPLE << "Method: " + req.method << RESET << std::endl;
+	std::cout << PURPLE << "Port: " + req.port << RESET << std::endl;
+	std::cout << PURPLE << "Host: " + req.host << RESET << std::endl;
+	std::cout << PURPLE << "URI: " + req.uri << RESET << std::endl;
+	std::cout << PURPLE << "Version: " + req.httpVersion << RESET << std::endl;
 	if (req.content_type != "")
-		std::cout << "Content-Type: " + req.content_type << std::endl;
+		std::cout << PURPLE << "Content-Type: " + req.content_type << RESET << std::endl;
 	if (req.user_agent != "")
-		std::cout << "User-Agent: " + req.user_agent << std::endl;
+		std::cout << PURPLE << "User-Agent: " + req.user_agent << RESET << std::endl;
 	if (req.authorization != "")
-		std::cout << "Authorization: " + req.authorization << std::endl;
+		std::cout << PURPLE << "Authorization: " + req.authorization << RESET << std::endl;
 	if (req.query != "")
-		std::cout << "Query:" + req.query << std::endl;
+		std::cout << PURPLE << "Query:" + req.query << RESET << std::endl;
 	if (req.cgi_path != "")
-		std::cout << "CGI Path:" + req.cgi_path << std::endl;
+		std::cout << PURPLE << "CGI Path:" + req.cgi_path << RESET << std::endl;
 	if (req.body != "")
-		std::cout << "Body:" + req.body << std::endl;
+		std::cout << PURPLE << "Body:" + req.body << RESET << std::endl;
 }
 
 Request RequestParser::parsingRequest(const std::string &rawRequest)
