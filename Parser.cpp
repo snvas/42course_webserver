@@ -23,7 +23,7 @@ std::string readConfigFile(const std::string &path)
 	std::ifstream configFile(path.c_str());
 	if (!configFile.is_open())
 	{
-		std::cerr << "Erro ao abrir o arquivo de configuração." << std::endl;
+		std::cerr << RED << "Erro ao abrir o arquivo de configuração." << RESET << std::endl;
 		std::exit(1); // Encerra o programa
 	}
 	std::string config((std::istreambuf_iterator<char>(configFile)),
