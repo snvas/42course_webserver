@@ -32,4 +32,4 @@ echo "<h2>Teste de vari&aacute;veis de ambiente para php-cgi</h2>";
 } else {
     echo "Envie uma solicitação POST para visualizar as informações.";
 }
-?>
+?>chave=123&valor=123
