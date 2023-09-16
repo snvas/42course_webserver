@@ -66,7 +66,7 @@ def test_post_method():
 
 def test_body_too_large():
     body = ""
-    for i in range(101):
+    for i in range(200):
         body += str(i%10)
     res = requests.get(server2_url, data=body)
 
