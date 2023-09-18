@@ -12,8 +12,8 @@ struct ClientSocket
 {
 	int clientfd;
 	int serverIndex;
+	size_t bytesRead;
 	std::string request;
-	int contentLength;
 };
 
 class Server
@@ -26,7 +26,8 @@ public:
 
 	bool initializeServer(int index);
 	void run();
-	void processClientRequest(ClientSocket *clientSocket);
+	void sendClientResponse(ClientSocket *clientSocket);
+	void recieveClientRequest(ClientSocket *clientSocket);
 	void acceptNewConnection(int serverSocket);
 	void stop();
 
@@ -36,9 +37,9 @@ private:
 	std::vector<pollfd> m_pollfds;
 	std::vector<int> m_serverSocks;
 	std::vector<ClientSocket> m_clients;
-
 	bool setSocketToNonBlocking(int socket);
-	void handleIncomingRequest();
+	void handleIncomingRequest(pollfd *pfd);
+	void handleOutgoingResponse(pollfd *pfd);
 	bool bindSocketAndListen(int index);
 	std::string numberToString(int number);
 	void printRequestDetails(const Request &request);
